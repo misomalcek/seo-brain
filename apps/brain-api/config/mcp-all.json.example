@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "ahrefs": {
+      "command": "npx",
+      "args": ["-y", "@ahrefs/mcp"],
+      "env": {
+        "AHREFS_API_TOKEN": "Bearer YOUR_AHREFS_API_TOKEN_HERE"
+      }
+    },
+    "gsc": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-gsc"],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "/opt/team-brain/credentials/gsc-service-account.json"
+      }
+    }
+  }
+}

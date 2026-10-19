@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test SEO Audit — Brain Report</title>
+  
+<style>
+  :root {
+    --bg: #0a0e17;
+    --card: #111827;
+    --border: #1f2937;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --primary: #6366f1;
+    --accent: #8b5cf6;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+  h1 { font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  h2 { font-size: 1.4rem; margin: 2rem 0 1rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+  h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; color: var(--text); }
+  p { margin-bottom: 1rem; color: var(--muted); }
+  .header { margin-bottom: 2rem; }
+  .header .meta { color: var(--muted); font-size: 0.875rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; text-align: center; }
+  .stat .value { font-size: 2rem; font-weight: 700; color: var(--primary); }
+  .stat .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+  th { background: var(--card); text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+  td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
+  tr:hover td { background: rgba(99, 102, 241, 0.05); }
+  .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+  .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--green); }
+  .badge-red { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+  .badge-yellow { background: rgba(245, 158, 11, 0.15); color: var(--yellow); }
+  .badge-primary { background: rgba(99, 102, 241, 0.15); color: var(--primary); }
+  ul, ol { margin: 0.5rem 0 1rem 1.5rem; color: var(--muted); }
+  li { margin-bottom: 0.4rem; }
+  .bar-chart { display: flex; flex-direction: column; gap: 0.5rem; }
+  .bar-row { display: flex; align-items: center; gap: 0.75rem; }
+  .bar-label { width: 120px; font-size: 0.8rem; color: var(--muted); text-align: right; }
+  .bar-track { flex: 1; height: 24px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 0.7rem; color: white; }
+  .footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 0.75rem; }
+  @media print { body { background: white; color: #333; } .card { border-color: #ddd; } }
+</style>
+</head>
+<body>
+<body>
+    <div class="header">
+        <h1>Test SEO Audit</h1>
+        <div class="meta">Dátum: 15. februára 2026 | Webová stránka: example.com</div>
+    </div>
+
+    <div class="card">
+        <h2>🌐 Prehľad domény</h2>
+        <div class="grid">
+            <div class="stat">
+                <div class="stat-number">245</div>
+                <div class="stat-label">Indexované stránky</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">72</div>
+                <div class="stat-label">Skóre SEO</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">3.2s</div>
+                <div class="stat-label">Rýchlosť načítania</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">68</div>
+                <div class="stat-label">Mobilné skóre</div>
+            </div>
+        </div>
+        <p><strong>Doménová autorita:</strong> <span class="badge-yellow">DA 42</span> | <strong>Vek domény:</strong> 3 roky 8 mesiacov</p>
+        <p><strong>Technický stav:</strong> Stránka má dobré základy, ale vyžaduje optimalizáciu rýchlosti a mobilnej verzie.</p>
+    </div>
+
+    <div class="card">
+        <h2>🎯 Hodnotenie kľúčových slov</h2>
+        <table>
+            <tr>
+                <th>Kľúčové slovo</th>
+                <th>Pozícia</th>
+                <th>Objem vyhľadávania</th>
+                <th>Trend</th>
+                <th>Stav</th>
+            </tr>
+            <tr>
+                <td>digitálny marketing</td>
+                <td>8</td>
+                <td>2,400</td>
+                <td>↗️</td>
+                <td><span class="badge-yellow">Stredný</span></td>
+            </tr>
+            <tr>
+                <td>seo služby</td>
+                <td>15</td>
+                <td>1,900</td>
+                <td>↘️</td>
+                <td><span class="badge-red">Zhoršenie</span></td>
+            </tr>
+            <tr>
+                <td>online marketing</td>
+                <td>3</td>
+                <td>3,200</td>
+                <td>→</td>
+                <td><span class="badge-green">Výborný</span></td>
+            </tr>
+            <tr>
+                <td>webový design</td>
+                <td>12</td>
+                <td>1,600</td>
+                <td>↗️</td>
+                <td><span class="badge-yellow">Dobrý</span></td>
+            </tr>
+            <tr>
+                <td>ppc reklama</td>
+                <td>22</td>
+                <td>890</td>
+                <td>↘️</td>
+                <td><span class="badge-red">Slabý</span></td>
+            </tr>
+        </table>
+        <p><strong>Celkový počet sledovaných kľúčových slov:</strong> 47 | <strong>Top 10 pozícií:</strong> 12 kľúčových slov</p>
+    </div>
+
+    <div class="card">
+        <h2>🔗 Profil spätných odkazov</h2>
+        <div class="grid">
+            <div class="stat">
+                <div class="stat-number">1,284</div>
+                <div class="stat-label">Celkové backlinky</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">156</div>
+                <div class="stat-label">Referujúce domény</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">89%</div>
+                <div class="stat-label">Kvalitné odkazy</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">+24</div>
+                <div class="stat-label">Nové odkazy (mesiac)</div>
+            </div>
+        </div>
+        
+        <h3>Top referujúce domény</h3>
+        <table>
+            <tr>
+                <th>Doména</th>
+                <th>DA</th>
+                <th>Počet odkazov</th>
+                <th>Typ</th>
+            </tr>
+            <tr>
+                <td>techblog.sk</td>
+                <td>65</td>
+                <td>23</td>
+                <td><span class="badge-green">Follow</span></td>
+            </tr>
+            <tr>
+                <td>businessportal.sk</td>
+                <td>58</td>
+                <td>18</td>
+                <td><span class="badge-green">Follow</span></td>
+            </tr>
+            <tr>
+                <td>marketingguide.com</td>
+                <td>72</td>
+                <td>12</td>
+                <td><span class="badge-green">Follow</span></td>
+            </tr>
+            <tr>
+                <td>industry-news.sk</td>
+                <td>45</td>
+                <td>31</td>
+                <td><span class="badge-yellow">Mixed</span></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>📊 Najlepšie stránky</h2>
+        <table>
+            <tr>
+                <th>URL</th>
+                <th>Organická návštevnosť</th>
+                <th>Kľúčové slová</th>
+                <th>Avg. pozícia</th>
+                <th>Stav</th>
+            </tr>
+            <tr>
+                <td>/digitalne-marketing-trendy</td>
+                <td>2,845</td>
+                <td>67</td>
+                <td>7.2</td>
+                <td><span class="badge-green">Výborný</span></td>
+            </tr>
+            <tr>
+                <td>/seo-optimalizacia-guide</td>
+                <td>1,923</td>
+                <td>43</td>
+                <td>11.8</td>
+                <td><span class="badge-yellow">Dobrý</span></td>
+            </tr>
+            <tr>
+                <td>/</td>
+                <td>1,678</td>
+                <td>28</td>
+                <td>9.4</td>
+                <td><span class="badge-green">Výborný</span></td>
+            </tr>
+            <tr>
+                <td>/ppc-kampane-navod</td>
+                <td>892</td>
+                <td>22</td>
+                <td>16.3</td>
+                <td><span class="badge-yellow">Stredný</span></td>
+            </tr>
+            <tr>
+                <td>/webovy-design-portfolio</td>
+                <td>756</td>
+                <td>19</td>
+                <td>14.7</td>
+                <td><span class="badge-yellow">Stredný</span></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>🏆 Analýza konkurencie</h2>
+        <div class="bar-chart">
+            <div class="bar-item">
+                <span>konkurent-a.sk</span>
+                <div class="bar">
+                    <div class="bar-fill" style="width: 85%">DA 68</div>
+                </div>
+            </div>
+            <div class="bar-item">
+                <span>marketing-pro.sk</span>
+                <div class="bar">
+                    <div class="bar-fill" style="width: 70%">DA 56</div>
+                </div>
+            </div>
+            <div class="bar-item">
+                <span>example.com</span>
+                <div class="bar">
+                    <div class="bar-fill" style="width: 52%">DA 42</div>
+                </div>
+            </div>
+            <div class="bar-item">
+                <span>seo-expert.sk</span>
+                <div class="bar">
+                    <div class="bar-fill" style="width: 48%">DA 38</div>
+                </div>
+            </div>
+        </div>
+        
+        <h3>Porovnanie kľúčových metrík</h3>
+        <table>
+            <tr>
+                <th>Konkurent</th>
+                <th>Org. návštevnosť</th>
+                <th>Top 10 KW</th>
+                <th>Backlinky</th>
+                <th>Gap príležitosti</th>
+            </tr>
+            <tr>
+                <td>konkurent-a.sk</td>
+                <td>45,200</td>
+                <td>234</td>
+                <td>5,670</td>
+                <td><span class="badge-red">Vysoká</span></td>
+            </tr>
+            <tr>
+                <td>marketing-pro.sk</td>
+                <td>28,900</td>
+                <td>156</td>
+                <td>3,240</td>
+                <td><span class="badge-yellow">Stredná</span></td>
+            </tr>
+            <tr>
+                <td>seo-expert.sk</td>
+                <td>12,400</td>
+                <td>89</td>
+                <td>1,890</td>
+                <td><span class="badge-green">Nízka</span></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>💡 Odporúčania a akčný plán</h2>
+        
+        <h3>🔴 Kritické problémy (riešiť okamžite)</h3>
+        <ul>
+            <li><strong>Rýchlosť stránky:</strong> Optimalizovať obrázky a implementovať lazy loading (aktuálne 3.2s)</li>
+            <li><strong>Mobilná verzia:</strong> Zlepšiť responzívny dizajn a Core Web Vitals (skóre 68/100)</li>
+            <li><strong>Meta popis:</strong> 23 stránok má chybajúci alebo duplicitný meta popis</li>
+        </ul>
+
+        <h3>🟡 Stredne dôležité (riešiť do 30 dní)</h3>
+        <ul>
+            <li><strong>Obsahová stratégia:</strong> Vytvoriť obsah pre kľúčové slová na pozíciách 11-20</li>
+            <li><strong>Interné linkovanie:</strong> Zlepšiť štruktúru interných odkazov pre kľúčové stránky</li>
+            <li><strong>Schema markup:</strong> Implementovať štruktúrované dáta pre lepšie SERP zobrazenie</li>
+        </ul>
+
+        <h3>🟢 Dlhodobé ciele (riešiť do 90 dní)</h3>
+        <ul>
+            <li><strong>Link building:</strong> Získať 20-30 kvalitných backlinkov z relevantných domén</li>
+            <li><strong>Konkurenčná analýza:</strong> Cieliť kľúčové slová, kde konkurencia dominuje</li>
+            <li><strong>Technické SEO:</strong> Implementovať pokročilé optimalizácie (HTTPS, XML sitemap)</li>
+        </ul>
+
+        <div class="grid">
+            <div class="stat">
+                <div class="stat-number">15</div>
+                <div class="stat-label">Kritické problémy</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">28</div>
+                <div class="stat-label">Stredne dôležité</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Dlhodobé ciele</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">+35%</div>
+                <div class="stat-label">Očakávaný rast</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated by Brain AI
+    </div>
+</body>
+</body>
+</html>

@@ -1,0 +1,370 @@
+@import "tailwindcss";
+
+/* ============================================
+   DESIGN TOKENS — Brain One UI (Example Org crimson)
+   WCAG AA verified: all text combos ≥ 4.5:1
+   ============================================ */
+@theme {
+  /* Brand — single accent (crimson) */
+  --color-primary: #a01441;
+  --color-primary-foreground: #ffffff;
+  --color-accent: #a01441;
+  --color-accent-foreground: #ffffff;
+
+  /* Surfaces — warm bone whites */
+  --color-background: #f8f7f5;
+  --color-foreground: #1a1a2e;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f1efe9;
+  --color-surface-active: #eae7e0;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1a2e;
+
+  /* Text — WCAG AA verified */
+  --color-muted: #f1efe9;
+  --color-muted-foreground: #595973;
+
+  /* Borders — alpha-based for glass compatibility */
+  --color-border: rgba(0, 0, 0, 0.06);
+  --color-border-subtle: rgba(0, 0, 0, 0.04);
+  --color-border-hover: rgba(0, 0, 0, 0.12);
+
+  /* Ring */
+  --color-ring: #a01441;
+
+  /* Semantic soft */
+  --color-primary-soft: rgba(160, 20, 65, 0.08);
+  --color-accent-soft: rgba(160, 20, 65, 0.08);
+
+  /* Layout */
+  --chat-max-w: 768px;
+
+  /* Radii */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows — warm tones + accent glow */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 4px 20px rgba(160, 20, 65, 0.12);
+
+  /* Timing */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+/* Brain One Dark — deep navy + crimson glow */
+.dark {
+  --color-background: #0a0e1a;
+  --color-foreground: #e8e6f0;
+  --color-surface: #111827;
+  --color-surface-hover: #1a2035;
+  --color-surface-active: #232940;
+  --color-card: #111827;
+  --color-card-foreground: #e8e6f0;
+  --color-primary: #e54068;
+  --color-primary-foreground: #0a0e1a;
+  --color-accent: #e54068;
+  --color-accent-foreground: #0a0e1a;
+  --color-muted: #1a2035;
+  --color-muted-foreground: #8b8ba0;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-subtle: rgba(255, 255, 255, 0.04);
+  --color-border-hover: rgba(255, 255, 255, 0.12);
+  --color-ring: #e54068;
+  --color-primary-soft: rgba(229, 64, 104, 0.12);
+  --color-accent-soft: rgba(229, 64, 104, 0.12);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 4px 30px rgba(229, 64, 104, 0.2), 0 0 60px rgba(229, 64, 104, 0.08);
+}
+
+/* ============================================
+   BASE
+   ============================================ */
+html, body {
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-feature-settings: "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Brain One mesh gradient — subtle atmospheric depth */
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(13, 27, 62, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(45, 90, 123, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(160, 20, 65, 0.03) 0%, transparent 50%);
+}
+
+.dark body,
+body.dark {
+  background-image:
+    radial-gradient(ellipse at 15% 50%, rgba(229, 64, 104, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 20%, rgba(0, 180, 220, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(100, 60, 200, 0.03) 0%, transparent 50%);
+}
+
+/* Glass surface utilities */
+.glass-surface {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+.dark .glass-surface {
+  background: none;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Clean borders — subtle dividers, but preserve interactive element borders */
+.border-t.border-border,
+.border-b.border-border,
+.border-l.border-border,
+.border-r.border-border,
+header.border-border,
+.border-border:not(button):not(a):not(input):not(select):not([role="checkbox"]) {
+  border-color: rgba(0,0,0,0.04);
+}
+.dark .border-t.border-border,
+.dark .border-b.border-border,
+.dark .border-l.border-border,
+.dark .border-r.border-border,
+.dark header.border-border,
+.dark .border-border:not(button):not(a):not(input):not(select):not([role="checkbox"]) {
+  border-color: rgba(255,255,255,0.04);
+}
+
+/* animate-in utilities (replaces tailwindcss-animate dependency) */
+@keyframes slideInFromBottom {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-in {
+  animation: slideInFromBottom 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.slide-in-from-bottom-4 {
+  animation-name: slideInFromBottom;
+}
+.fade-in-0 {
+  animation-name: fadeIn;
+}
+
+.accent-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+/* Respect reduced motion preferences (WCAG 2.1 AA §2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Feature Panel dock — #10 (2026-04-29): icons already have own bg+ring,
+   wrapper background+border was redundant double-frame. Stripped to bare flex container. */
+.feature-dock {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0;
+}
+.dark .feature-dock {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0;
+}
+
+/* Feature dock item — button container */
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+  background: transparent;
+}
+.dock-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.dark .dock-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Icon jewel — tinted rounded-square behind icon */
+.dock-jewel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.dock-item:hover .dock-jewel {
+  transform: scale(1.08);
+}
+.dock-item.active .dock-jewel {
+  transform: scale(1.05);
+}
+
+/* Dark mode: purple glow atmosphere behind dock + input area */
+.dark .dock-glow {
+  position: relative;
+}
+.dark .dock-glow::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 200px;
+  background: radial-gradient(ellipse at center bottom, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.03) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* Accessibility: focus-visible ring for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-border-hover); }
+
+/* ============================================
+   SELECTION
+   ============================================ */
+::selection {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 8px 32px rgba(194, 0, 58, 0.2), var(--shadow-md); }
+  50% { box-shadow: 0 12px 48px rgba(194, 0, 58, 0.35), 0 4px 16px rgba(140, 36, 245, 0.15), var(--shadow-md); }
+}
+
+@keyframes typeBounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in-up { animation: fadeInUp 0.4s var(--ease-out) both; }
+.animate-msg-in { animation: msgIn 0.3s var(--ease-out) both; }
+.animate-pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
+.animate-type-bounce { animation: typeBounce 1.4s infinite both; }
+
+/* Staggered delays */
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+.delay-5 { animation-delay: 0.25s; }
+.delay-6 { animation-delay: 0.3s; }
+
+/* Chat message content — prevent overflow from long words, URLs, code */
+.space-y-2 {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
+}
+
+/* All paragraphs and inline text inside messages — break long lines */
+.space-y-2 p,
+.space-y-2 span,
+.space-y-2 li,
+.space-y-2 div,
+.space-y-2 strong,
+.space-y-2 em {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Inline code — allow wrapping */
+.space-y-2 code:not(pre code) {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+/* Tables in chat messages — horizontal scroll instead of breaking layout */
+.overflow-x-auto {
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Code blocks — ensure they scroll horizontally, never push parent wider */
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Chat bubble container — prevent any content from exceeding bubble width */
+[class*="rounded-2xl"][class*="px-5"] {
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Flex column containers inside chat — ensure min-width 0 for proper shrinking */
+.flex.flex-col {
+  min-width: 0;
+}
+
+/* Hide native scrollbar — used on chat messages container with timeline scrollbar */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+

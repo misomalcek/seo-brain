@@ -1,0 +1,18 @@
+{
+  "name": "seo-brain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SEO Brain — a local SEO workspace with an optional server edition",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:api": "npm run build -w apps/brain-api",
+    "build:chat": "npm run build -w apps/brain-chat",
+    "dev:api": "npm run dev -w apps/brain-api",
+    "dev:chat": "npm run dev -w apps/brain-chat"
+  },
+  "author": "Example Org",
+  "license": "MIT"
+}
