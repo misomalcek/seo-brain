@@ -6,6 +6,12 @@
   "workspaces": [
     "apps/*"
   ],
+  "overrides": {
+    "image-size": "2.0.3",
+    "pptxgenjs": {
+      "image-size": "2.0.3"
+    }
+  },
   "scripts": {
     "build": "npm run build --workspaces",
     "build:api": "npm run build -w apps/brain-api",
