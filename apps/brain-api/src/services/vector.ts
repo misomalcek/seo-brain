@@ -1,5 +1,5 @@
 /**
- * Vector Service — pgvector + @xenova/transformers
+ * Vector Service — pgvector + @huggingface/transformers
  *
  * Provides semantic search, hybrid search, embedding generation,
  * and content similarity analysis for Team Brain.
@@ -24,11 +24,11 @@ async function getEmbeddingPipeline() {
   modelLoading = (async () => {
     console.log('[vector] Loading embedding model (first use)...');
     const start = Date.now();
-    const { pipeline: createPipeline } = await import('@xenova/transformers');
+    const { pipeline: createPipeline } = await import('@huggingface/transformers');
     // Nomic 768d (2026-06-10, migrated from MiniLM-384). Still fully in-process via
-    // @xenova/transformers — no external embedding service, so handover stays simple.
+    // @huggingface/transformers — no external embedding service, so handover stays simple.
     pipeline = await createPipeline('feature-extraction', 'Xenova/nomic-embed-text-v1', {
-      quantized: true,
+      dtype: 'q8',
     });
     console.log(`[vector] Model loaded in ${Date.now() - start}ms`);
     modelLoading = null;

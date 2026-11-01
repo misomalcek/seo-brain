@@ -14,7 +14,6 @@
 import { Pool } from 'pg';
 import TurndownService from 'turndown';
 import { createHash } from 'crypto';
-import { pipeline as createPipeline } from '@xenova/transformers';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -154,8 +153,8 @@ let embedPipeline: any = null;
 async function embed(text: string): Promise<number[]> {
   if (!embedPipeline) {
     console.log('  [embed] Loading MiniLM model...');
-    const { pipeline } = await import('@xenova/transformers');
-    embedPipeline = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', { quantized: true });
+    const { pipeline } = await import('@huggingface/transformers');
+    embedPipeline = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', { dtype: 'q8' });
     console.log('  [embed] Model loaded');
   }
   const out = await embedPipeline(text.slice(0, MAX_EMBED_CHARS * 4), { pooling: 'mean', normalize: true });

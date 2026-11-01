@@ -421,7 +421,7 @@ const EMBED_MODEL_ID = 'Xenova/nomic-embed-text-v1'; // 768d (migrated from Mini
 
 /**
  * Generate + store embedding for a memory. Fire-and-forget pattern.
- * Uses Brain's existing @xenova/transformers pipeline via vector.ts service.
+ * Uses Brain's existing embedding pipeline via vector.ts service.
  */
 export async function embedMemory(memoryId: string, content: string): Promise<void> {
   try {

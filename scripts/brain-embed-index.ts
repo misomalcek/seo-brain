@@ -17,8 +17,8 @@ const MAX_CHUNK = 1500;
 let embedFn: ((t: string) => Promise<number[]>) | null = null;
 async function embed(text: string): Promise<number[]> {
   if (!embedFn) {
-    const { pipeline } = await import('@xenova/transformers');
-    const pipe = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', { quantized: true });
+    const { pipeline } = await import('@huggingface/transformers');
+    const pipe = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', { dtype: 'q8' });
     embedFn = async (t) => {
       const out = await pipe(t.slice(0, MAX_CHUNK), { pooling: 'mean', normalize: true });
       return Array.from(out.data as Float32Array);
