@@ -8,10 +8,17 @@ const stage = path.join(root, 'apps', 'desktop', 'src-tauri', 'resources');
 const apiStage = path.join(stage, 'brain-api');
 const chatStage = path.join(stage, 'brain-chat', 'out');
 
-const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const npm = 'npm';
 
 function run(cmd, args, cwd) {
-  const result = spawnSync(cmd, args, { cwd, stdio: 'inherit' });
+  const result = spawnSync(cmd, args, {
+    cwd,
+    stdio: 'inherit',
+    shell: process.platform === 'win32',
+  });
+  if (result.error) {
+    console.error(result.error);
+  }
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
   }
