@@ -4,7 +4,18 @@ A workspace for search work. You talk to it, it reads your notes and the files y
 
 Two ways to run it. One codebase.
 
-The **desktop app** is for a person who does not run servers. It is not in this first commit. The database it will use is already proven: Postgres in the app, no install. The **server edition** is the one that deploys today, on a Linux machine, with Postgres.
+The **desktop app** is for a person who does not run servers. It needs Node already installed, and it keeps Postgres inside the app. The **server edition** deploys on a Linux machine, with Postgres.
+
+## Download
+
+Version 0.1.0. Apple Silicon and Windows 10/11, 64-bit.
+
+| | |
+| --- | --- |
+| macOS, Apple Silicon | [seo-brain_0.1.0_aarch64.dmg](https://github.com/misomalcek/seo-brain/releases/download/v0.1.0/seo-brain_0.1.0_aarch64.dmg) |
+| Windows 10/11, x64 | [seo-brain_0.1.0_x64-setup.exe](https://github.com/misomalcek/seo-brain/releases/download/v0.1.0/seo-brain_0.1.0_x64-setup.exe) |
+
+The Mac image is built on this machine and wrapped with `hdiutil`. The Windows installer is the GitHub Actions workflow `.github/workflows/windows.yml`, started by hand. Keys stay on the machine.
 
 No account with us. A model key is yours. Nothing in this repository is a credential.
 

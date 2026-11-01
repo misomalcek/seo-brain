@@ -1,3 +1,4 @@
+import { brainPath } from '../paths';
 /**
  * GA4 API Service — Direct service account authentication to Google Analytics Data API v1beta.
  * Mirrors gsc-api.ts pattern with JWT (RS256) service account auth.
@@ -17,7 +18,7 @@
 import fs from 'fs';
 import crypto from 'crypto';
 
-const SERVICE_ACCOUNT_FILE = '/opt/team-brain/credentials/ga4-service-account.json';
+const SERVICE_ACCOUNT_FILE = brainPath('credentials', 'ga4-service-account.json');
 const GA4_BASE = 'https://analyticsdata.googleapis.com/v1beta';
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const SCOPE = 'https://www.googleapis.com/auth/analytics.readonly';
@@ -35,6 +36,11 @@ interface TokenCache {
 
 let serviceAccount: ServiceAccount | null = null;
 let tokenCache: TokenCache | null = null;
+
+export function resetGa4Auth(): void {
+  serviceAccount = null;
+  tokenCache = null;
+}
 
 function loadServiceAccount(): ServiceAccount {
   if (!serviceAccount) {
@@ -239,7 +245,7 @@ export async function trafficOverview(propertyId: string, startDate?: string, en
     hostName,
   });
 
-  const channels = report.rows.map(row => ({
+  const channels = (report.rows || []).map(row => ({
     channel: row.dimensionValues[0]?.value || '(unknown)',
     activeUsers: parseInt(row.metricValues[0]?.value || '0', 10),
     sessions: parseInt(row.metricValues[1]?.value || '0', 10),

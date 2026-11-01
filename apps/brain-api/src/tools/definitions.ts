@@ -1413,6 +1413,19 @@ Always "get" the current definition BEFORE update, and "get" again AFTER to veri
     }
   },
 
+  {
+    name: 'cloudflare_zone_analytics',
+    description: 'Edge traffic for a domain we proxy on Cloudflare Free. Last N days (max 31): request count, visits, and response bytes. Use for how busy the site is. Not Cache Analytics. Example: {"domain":"aisvet.sk","days":7}',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        domain: { type: 'string', description: 'Hostname, for example aisvet.sk' },
+        days: { type: 'number', description: 'Lookback in days. Default 7. Maximum 31.' },
+      },
+      required: ['domain'],
+    },
+  },
+
   // ==================== PTC — Programmatic Tool Calling ====================
   // Sandboxed JS execution for math, data analysis, transformations on prior tool outputs.
   // Implements "llm-not-calculator" rule: any calc > 3 steps, > 4-digit precision, or aggregation
@@ -1428,7 +1441,34 @@ Always "get" the current definition BEFORE update, and "get" again AFTER to veri
       },
       required: ['code'],
     }
-  }
+  },
+
+  // ==================== SERPAPI — GOOGLE ORGANIC + AI MODE ====================
+  {
+    name: 'google_organic',
+    description: 'Google organic results for one query via SerpAPI (engine=google). One call spends one monthly credit (~250/month). Returns the first page only: position, title, link, snippet. Use when the user asks who ranks, what the SERP shows, or for live Google results. Not Ahrefs. Not Search Console. Example: {"query":"seo audit bratislava","gl":"sk","hl":"sk"}',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        query: { type: 'string', description: 'The Google query.' },
+        gl: { type: 'string', description: 'Country code. Default sk.' },
+        hl: { type: 'string', description: 'Interface language. Default sk.' },
+        num: { type: 'number', description: 'Results to return. Default 10, maximum 10 (one page).' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'google_ai_mode',
+    description: 'One simple Google AI Mode answer via SerpAPI (engine=google_ai_mode). One call spends one monthly credit. Keep the query short. The answer is a snapshot, not a multi-turn chat. Use for a quick "what does Google say" check. Example: {"query":"what is topical authority"}',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        query: { type: 'string', description: 'A short question. Long or multi-part queries fail.' },
+      },
+      required: ['query'],
+    },
+  },
 ];
 
 // Estimated token costs per tool (for Master Planner budget estimation)
@@ -1460,6 +1500,8 @@ export const TOOL_TOKEN_COSTS: Record<string, { avg: number; max: number }> = {
   gsc_quick_wins: { avg: 5000, max: 15000 },
   gsc_tech_seo: { avg: 2000, max: 5000 },
   web_fetch: { avg: 3000, max: 8000 },
+  google_organic: { avg: 1500, max: 4000 },
+  google_ai_mode: { avg: 2000, max: 6000 },
   web_render: { avg: 5000, max: 15000 },
   plan_task: { avg: 100, max: 500 },
   lighthouse_audit: { avg: 20000, max: 45000 },
@@ -1502,7 +1544,7 @@ export const TOOL_CATEGORIES = {
   search: {
     name: 'Utilities',
     icon: '⚙️',
-    tools: ['web_search', 'web_fetch', 'web_render', 'get_current_date']
+    tools: ['web_search', 'web_fetch', 'web_render', 'google_organic', 'google_ai_mode', 'get_current_date']
   },
   docs: {
     name: 'Docs',

@@ -1,0 +1,33 @@
+name: windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - name: Build the Windows installer
+        working-directory: apps/desktop
+        run: npx tauri build --bundles nsis
+        env:
+          CI: true
+      - name: Rename the installer
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem "apps/desktop/src-tauri/target/release/bundle/nsis/*-setup.exe" | Select-Object -First 1
+          if (-not $exe) { throw "nsis installer not found" }
+          $dest = Join-Path $exe.DirectoryName "seo-brain_0.1.0_x64-setup.exe"
+          Move-Item -Force $exe.FullName $dest
+          Get-Item $dest | Select-Object Name, Length
+      - uses: actions/upload-artifact@v7
+        with:
+          name: seo-brain-windows
+          path: apps/desktop/src-tauri/target/release/bundle/nsis/seo-brain_0.1.0_x64-setup.exe
+          if-no-files-found: error

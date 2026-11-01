@@ -1,3 +1,4 @@
+import { brainPath } from '../paths';
 import { Router, Request, Response } from 'express';
 import { executeMCPTool, getAvailableMCPTools, MCPRequest } from '../services/mcp-bridge';
 
@@ -59,7 +60,7 @@ mcpRouter.get('/health', (req: Request, res: Response) => {
     status: 'ok',
     service: 'mcp-bridge',
     claudePath: '/home/brain-admin/.nvm/versions/node/v22.13.1/bin/claude',
-    reportsDir: '/opt/team-brain/reports/mcp'
+    reportsDir: brainPath('reports', 'mcp')
   });
 });
 

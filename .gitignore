@@ -10,3 +10,5 @@ exports/
 snapshots/
 *.log
 .DS_Store
+apps/desktop/src-tauri/resources/
+apps/desktop/src-tauri/target/

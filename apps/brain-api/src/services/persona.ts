@@ -1,14 +1,17 @@
+import { brainRoot } from '../paths';
 import { getPersona, getAllPersonas, Persona } from '../personas/definitions';
 import { streamChatWithTools, Message } from './claude';
 import { query } from '../db/connection';
 import * as fs from 'fs';
 import * as path from 'path';
 import { BrainMode, coerceMode, getModePrompt } from './mode-controller.js';
+import { currentLanguage, siteContext } from './settings';
+import { tierAPrompt, tierBPrompt } from './prompt-budget';
 
 // Re-export BrainMode for backward compat (callers importing from persona.ts still work)
 export type { BrainMode };
 
-const TEAM_BRAIN_ROOT = '/opt/team-brain';
+const TEAM_BRAIN_ROOT = process.env.TEAM_BRAIN_ROOT || brainRoot();
 const CLAUDE_API_PATH = path.join(TEAM_BRAIN_ROOT, 'CLAUDE-API.md');
 const KNOWLEDGE_DIR = path.join(TEAM_BRAIN_ROOT, 'knowledge');
 const AGENTS_DIR = path.join(TEAM_BRAIN_ROOT, 'agents');
@@ -175,49 +178,52 @@ export async function getBrandContext(siteId: string): Promise<string> {
 
 /**
  * Build a system prompt that combines:
- * 1. CLAUDE-API.md (base capabilities + tools)
- * 2. Knowledge files (team context)
- * 3. Brand context (from DB, per-site)
- * 4. Brand/agent context (passed from chat.ts)
- * 5. Persona overlay (if active)
+ * Stable prefix first. Per-turn variables stay at the tail so a local
+ * model can reuse the prefix cache. Order: tier A, knowledge, mode,
+ * persona, tier B playbooks, brand, memory, language.
  */
-export function getSystemPrompt(personaId?: string, brandContext?: string, memoryContext?: string, mode?: BrainMode): string {
-  let prompt = BASE_SYSTEM_PROMPT + getKnowledgeContext();
+export function getSystemPrompt(
+  personaId?: string,
+  brandContext?: string,
+  memoryContext?: string,
+  mode?: BrainMode,
+  toolNames: string[] = [],
+  userText = '',
+): string {
+  let prompt = tierAPrompt() + getKnowledgeContext();
 
-  // Append mode-specific prompt (Brain Pt. II Sprint 1)
   const modePrompt = getModePrompt(mode);
-  if (modePrompt) {
-    prompt += `\n\n---\n\n${modePrompt}`;
+  if (modePrompt) prompt += `\n\n---\n\n${modePrompt}`;
+
+  if (personaId) {
+    const persona = getPersona(personaId);
+    if (persona) {
+      prompt += `\n\n---\n\n## Active Persona: ${persona.icon} ${persona.name} (${persona.nameLocalized})\n\n${persona.systemPrompt}\n\nWhen responding, adopt this persona's perspective while maintaining your core capabilities and tool access. Your tone and analysis should reflect this persona's worldview.`;
+    }
   }
 
-  // Append memory context (brain_memories — learned preferences, patterns)
-  if (memoryContext) {
-    prompt += `\n\n---\n\n${memoryContext}`;
-  }
+  const playbooks = tierBPrompt(toolNames, userText);
+  if (playbooks) prompt += `\n\n---\n\n${playbooks}`;
+  if (brandContext) prompt += `\n\n---\n\n${brandContext}`;
+  if (memoryContext) prompt += `\n\n---\n\n${memoryContext}`;
+  return prompt + languageDirective();
+}
 
-  // Append brand/agent context if provided (comes from chat.ts with clear section headings)
-  if (brandContext) {
-    prompt += `\n\n---\n\n${brandContext}`;
-  }
+const REPLY_LANGUAGE: Record<string, string> = {
+  en: 'English',
+  de: 'German',
+  sk: 'Slovak',
+  cs: 'Czech',
+};
 
-  if (!personaId) {
-    return prompt;
-  }
-
-  const persona = getPersona(personaId);
-  if (!persona) {
-    return prompt;
-  }
-
-  return `${prompt}
+function languageDirective(): string {
+  const { replyLanguage } = currentLanguage();
+  const name = REPLY_LANGUAGE[replyLanguage] || 'English';
+  return `
 
 ---
 
-## Active Persona: ${persona.icon} ${persona.name} (${persona.nameLocalized})
-
-${persona.systemPrompt}
-
-When responding, adopt this persona's perspective while maintaining your core capabilities and tool access. Your tone and analysis should reflect this persona's worldview.`;
+Reply in ${name}. Write the answer, and any file or report you produce in this turn, in ${name}. If the user's message asks for a different language, use that language for this turn's reply and outputs only.${siteContext()}`;
 }
 
 /**

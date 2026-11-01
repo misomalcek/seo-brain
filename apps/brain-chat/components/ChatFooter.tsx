@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from 'react';
 import type { Persona } from '@/lib/types';
 import { isSTTSupported, startListening } from '@/lib/voice';
+import { useI18n } from '@/lib/i18n';
 import { ExpandedComposer } from './ExpandedComposer';
 
 interface ChatFooterProps {
@@ -83,6 +84,7 @@ export function ChatFooter({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // Run V (2026-05-27) — expanded markdown composer (port from Factorium ComposerView).
   const [expanded, setExpanded] = useState(false);
+  const { t, speech } = useI18n();
 
   useEffect(() => {
     const ta = textareaRef.current;
@@ -102,7 +104,8 @@ export function ChatFooter({
     if (!isSTTSupported()) return;
     startListening(
       (text) => { if (text) onInputChange(input + (input ? ' ' : '') + text); },
-      () => {}
+      () => {},
+      speech,
     );
   };
 
@@ -113,7 +116,7 @@ export function ChatFooter({
         {isLoading && (
           <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            {currentTool ? `Používam ${currentTool}...` : 'Premýšľam...'}
+            {currentTool ? `${t('using')} ${currentTool}...` : t('thinking')}
           </div>
         )}
 
@@ -124,8 +127,8 @@ export function ChatFooter({
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Napíš správu..."
-            aria-label="Správa"
+            placeholder={t('message')}
+            aria-label={t('messageLabel')}
             rows={1}
             disabled={isLoading}
             className="w-full bg-transparent px-4 py-3.5 pr-28 text-foreground placeholder:text-muted-foreground focus:outline-none resize-none min-h-[52px] max-h-[200px] text-[15px] disabled:opacity-50"
@@ -136,8 +139,8 @@ export function ChatFooter({
             <button
               onClick={() => setExpanded(true)}
               className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl transition-all cursor-pointer text-muted-foreground hover:text-foreground"
-              title="Rozšírený markdown editor (uložiť/načítať šablóny)"
-              aria-label="Rozšírený editor"
+              title={t('expand')}
+              aria-label={t('expand')}
               type="button"
             >
               <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -152,7 +155,7 @@ export function ChatFooter({
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
-              title="Kontext" aria-label="Kontext"
+              title={t('context')} aria-label={t('context')}
               type="button"
             >
               <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -174,8 +177,8 @@ export function ChatFooter({
               <button
                 onClick={onStop}
                 className="h-11 w-11 rounded-full flex items-center justify-center transition-all cursor-pointer bg-red-500 text-white hover:bg-red-600 shadow-md shadow-red-500/40"
-                title="Zastaviť generovanie"
-                aria-label="Zastaviť generovanie"
+                title={t('stop')}
+                aria-label={t('stop')}
                 type="button"
               >
                 <span className="block h-3.5 w-3.5 rounded-sm bg-white" />
@@ -189,7 +192,7 @@ export function ChatFooter({
                     ? 'bg-primary text-primary-foreground accent-glow'
                     : 'bg-muted text-muted-foreground opacity-40'
                 }`}
-                title="Odoslať" aria-label="Odoslať"
+                title={t('send')} aria-label={t('send')}
                 type="button"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -256,7 +259,7 @@ export function ChatFooter({
               <button
                 onClick={handleMic}
                 className="h-8 w-8 rounded-full flex items-center justify-center bg-foreground/[0.05] dark:bg-white/[0.06] text-muted-foreground hover:text-foreground hover:bg-foreground/[0.10] transition-colors cursor-pointer"
-                title="Hlasový vstup" aria-label="Hlasový vstup"
+                title={t('voice')} aria-label={t('voice')}
                 type="button"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -284,8 +287,8 @@ export function ChatFooter({
                 <button
                   type="button"
                   onClick={() => onPersonaChange(null)}
-                  title="Zrušiť personu (späť na Neutrálny)"
-                  aria-label="Zrušiť aktívnu personu"
+                  title={t('clearPersona')}
+                  aria-label={t('clearPersona')}
                   className="w-6 h-6 rounded-full flex items-center justify-center text-xs text-muted-foreground hover:text-foreground hover:bg-foreground/[0.08] transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>

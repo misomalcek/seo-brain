@@ -1,3 +1,4 @@
+import { brainPath } from '../paths';
 import { Router, Request, Response } from 'express';
 import { query, queryOne } from '../db/connection';
 import { requireAdmin, requireTeamAdmin } from '../middleware/auth';
@@ -9,9 +10,9 @@ import { execFileSync } from 'child_process';
 import multer from 'multer';
 import crypto from 'crypto';
 
-const AGENTS_DIR = '/opt/team-brain/agents';
-const FRAMEWORKS_DIR = '/opt/team-brain/templates';
-const DATASETS_DIR = '/opt/team-brain/datasets';
+const AGENTS_DIR = brainPath('agents');
+const FRAMEWORKS_DIR = brainPath('templates');
+const DATASETS_DIR = brainPath('datasets');
 
 export const adminRouter = Router();
 
@@ -56,7 +57,7 @@ adminRouter.get('/health', requireAdmin, async (_req: Request, res: Response) =>
   const mcpConfigExists = fs.existsSync(mcpConfigPath);
 
   // Reports count
-  const reportsDir = '/opt/team-brain/reports/mcp';
+  const reportsDir = brainPath('reports', 'mcp');
   let reportCount = 0;
   try {
     reportCount = fs.readdirSync(reportsDir).filter(f => f.endsWith('.json')).length;
@@ -120,8 +121,8 @@ adminRouter.get('/health', requireAdmin, async (_req: Request, res: Response) =>
   // Pending actions
   let pendingInbox = 0;
   try {
-    if (fs.existsSync('/opt/team-brain/memory/inbox')) {
-      pendingInbox = fs.readdirSync('/opt/team-brain/memory/inbox').filter(f => f.endsWith('.md')).length;
+    if (fs.existsSync(brainPath('memory', 'inbox'))) {
+      pendingInbox = fs.readdirSync(brainPath('memory', 'inbox')).filter(f => f.endsWith('.md')).length;
     }
   } catch { /* ignore */ }
 
@@ -150,7 +151,7 @@ adminRouter.get('/health', requireAdmin, async (_req: Request, res: Response) =>
   // Last backup time
   let lastBackup: string | null = null;
   try {
-    const backupDir = '/opt/team-brain/backups';
+    const backupDir = brainPath('backups');
     if (fs.existsSync(backupDir)) {
       const backups = fs.readdirSync(backupDir)
         .filter(f => f.endsWith('.sql') || f.endsWith('.gz'))
@@ -515,6 +516,16 @@ adminRouter.get('/memory/embeddings/stats', requireAdmin, async (_req: Request, 
   }
 });
 
+async function queryOptional(sql: string): Promise<any[]> {
+  try {
+    return await query(sql);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (message.includes('does not exist')) return [];
+    throw err;
+  }
+}
+
 // ============================================================
 // Bronze Observability — tool_calls_log + agent_runs viewer
 // (admin-only, reads from TimescaleDB hypertables migrations 032+034)
@@ -548,7 +559,7 @@ adminRouter.get('/observability', requireAdmin, async (_req: Request, res: Respo
         ORDER BY called_at DESC
         LIMIT 100
       `),
-      query(`
+      queryOptional(`
         SELECT bucket, agent_id, model_used, mode,
                total_runs, success_runs, failure_runs,
                avg_duration_ms, p95_duration_ms,
@@ -558,7 +569,7 @@ adminRouter.get('/observability', requireAdmin, async (_req: Request, res: Respo
         ORDER BY bucket DESC
         LIMIT 168
       `),
-      query(`
+      queryOptional(`
         SELECT bucket, tool_name, agent_id,
                total_calls, success_calls, failure_calls,
                avg_duration_ms, p95_duration_ms
@@ -584,7 +595,7 @@ adminRouter.get('/observability', requireAdmin, async (_req: Request, res: Respo
 
 // GET /admin/memory - List memory files (brain-admin only)
 adminRouter.get('/memory', requireAdmin, (_req: Request, res: Response) => {
-  const memDir = '/opt/team-brain/memory';
+  const memDir = brainPath('memory');
   if (!fs.existsSync(memDir)) {
     res.json({ files: [] });
     return;
@@ -604,7 +615,7 @@ adminRouter.get('/memory', requireAdmin, (_req: Request, res: Response) => {
 // ============================================================
 // Memory Inbox (admin-only) — MUST be before /memory/:filename
 // ============================================================
-const MEMORY_INBOX_DIR = '/opt/team-brain/memory/inbox';
+const MEMORY_INBOX_DIR = brainPath('memory', 'inbox');
 
 adminRouter.get('/memory/inbox', requireAdmin, (_req: Request, res: Response) => {
   try {
@@ -692,7 +703,7 @@ adminRouter.get('/memory/:filename', requireAdmin, (req: Request, res: Response)
     res.status(400).json({ error: 'Invalid filename' });
     return;
   }
-  const filePath = path.join('/opt/team-brain/memory', filename);
+  const filePath = path.join(brainPath('memory'), filename);
   if (!fs.existsSync(filePath)) {
     res.status(404).json({ error: 'File not found' });
     return;
@@ -712,7 +723,7 @@ adminRouter.put('/memory/:filename', requireAdmin, (req: Request, res: Response)
     res.status(400).json({ error: 'content is required' });
     return;
   }
-  const memDir = '/opt/team-brain/memory';
+  const memDir = brainPath('memory');
   const filePath = path.join(memDir, filename);
   fs.writeFileSync(filePath, content, 'utf8');
   res.json({ success: true });
@@ -725,14 +736,14 @@ adminRouter.put('/memory/:filename', requireAdmin, (req: Request, res: Response)
 // ============================================================
 
 const SYSTEM_PROMPT_FILES = [
-  { id: 'claude-api', path: '/opt/team-brain/CLAUDE-API.md', label: 'CLAUDE-API.md', description: 'Runtime system prompt (loaded at startup)' },
-  { id: 'claude-md', path: '/opt/team-brain/CLAUDE.md', label: 'CLAUDE.md', description: 'Dev system prompt (full project context)' },
+  { id: 'claude-api', path: brainPath('CLAUDE-API.md'), label: 'CLAUDE-API.md', description: 'Runtime system prompt (loaded at startup)' },
+  { id: 'claude-md', path: brainPath('CLAUDE.md'), label: 'CLAUDE.md', description: 'Dev system prompt (full project context)' },
 ];
 
 // Dynamically add knowledge files
 function getSystemPromptFiles() {
   const files = [...SYSTEM_PROMPT_FILES];
-  const knowledgeDir = '/opt/team-brain/knowledge';
+  const knowledgeDir = brainPath('knowledge');
   if (fs.existsSync(knowledgeDir)) {
     for (const f of fs.readdirSync(knowledgeDir).filter(f => f.endsWith('.md')).sort()) {
       files.push({ id: `knowledge-${f}`, path: path.join(knowledgeDir, f), label: `knowledge/${f}`, description: 'Knowledge file (loaded into system prompt)' });
@@ -1319,7 +1330,7 @@ adminRouter.post('/html-reports/:id/share', async (req: Request, res: Response) 
 // ============================================================
 // Knowledge Base CRUD (admin-only)
 // ============================================================
-const KNOWLEDGE_DIR = '/opt/team-brain/knowledge';
+const KNOWLEDGE_DIR = brainPath('knowledge');
 const KNOWLEDGE_MAX_FILE = 2000; // chars per file
 const KNOWLEDGE_MAX_TOTAL = 8000; // total chars across all files
 

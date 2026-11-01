@@ -1,3 +1,4 @@
+import { brainPath } from '../paths';
 /**
  * GSC API Service — Direct service account authentication to Google Search Console API.
  * Uses JWT (JSON Web Token) with service account private key.
@@ -9,7 +10,7 @@
 import fs from 'fs';
 import crypto from 'crypto';
 
-const SERVICE_ACCOUNT_FILE = '/opt/team-brain/credentials/gsc-service-account.json';
+const SERVICE_ACCOUNT_FILE = brainPath('credentials', 'gsc-service-account.json');
 const GSC_BASE = 'https://searchconsole.googleapis.com/webmasters/v3';
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const SCOPE = 'https://www.googleapis.com/auth/webmasters';
@@ -27,6 +28,11 @@ interface TokenCache {
 
 let serviceAccount: ServiceAccount | null = null;
 let tokenCache: TokenCache | null = null;
+
+export function resetGscAuth(): void {
+  serviceAccount = null;
+  tokenCache = null;
+}
 
 function loadServiceAccount(): ServiceAccount {
   if (!serviceAccount) {

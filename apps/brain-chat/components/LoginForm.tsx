@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { useI18n } from '@/lib/i18n';
 
 export function LoginForm() {
   const { login } = useAuth();
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,7 +19,7 @@ export function LoginForm() {
 
     const result = await login(email, password);
     if (!result.success) {
-      setError(result.error || 'Prihlásenie zlyhalo');
+      setError(result.error || t('loginFailed'));
     }
 
     setLoading(false);
@@ -31,8 +33,8 @@ export function LoginForm() {
           <div className="inline-flex h-16 w-16 rounded-2xl bg-gradient-to-br from-primary via-accent to-primary items-center justify-center shadow-lg shadow-primary/20 mb-4">
             <span className="text-3xl" aria-hidden="true">🧠</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Team Brain</h1>
-          <p className="text-sm text-muted-foreground mt-1">AI Knowledge Hub pre tvoj tím</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('loginTitle')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('loginSubtitle')}</p>
         </div>
 
         {/* Login form */}
@@ -42,15 +44,13 @@ export function LoginForm() {
               <div>{error}</div>
               {/* Run S 2026-05-26 (qa-brain-2) — admin contact affordance,
                   replaces missing forgot-password flow. */}
-              <div className="mt-1.5 text-xs text-red-300/80">
-                Zabudnuté heslo? Kontaktujte admina: <a className="underline" href="mailto:msg.ai.copywriting@gmail.com">msg.ai.copywriting@gmail.com</a>
-              </div>
+              <div className="mt-1.5 text-xs text-red-300/80">{t('forgot')}</div>
             </div>
           )}
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-1">
-              Email
+              {t('email')}
             </label>
             <input
               id="email"
@@ -66,7 +66,7 @@ export function LoginForm() {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-muted-foreground mb-1">
-              Heslo
+              {t('password')}
             </label>
             <input
               id="password"
@@ -90,16 +90,16 @@ export function LoginForm() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                Prihlasujem...
+                {t('signingIn')}
               </span>
             ) : (
-              'Prihlásiť sa'
+              t('signIn')
             )}
           </button>
         </form>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Example Org &bull; Team Brain v{process.env.NEXT_PUBLIC_BRAIN_VERSION ?? '2.0'}
+          SEO Brain
         </p>
       </div>
     </div>

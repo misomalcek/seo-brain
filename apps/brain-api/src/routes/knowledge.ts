@@ -1,3 +1,4 @@
+import { brainRoot } from '../paths';
 import { Router, Request, Response } from 'express';
 import { isAnyAdmin } from '../middleware/auth';
 import {
@@ -117,7 +118,7 @@ knowledgeRouter.get('/frameworks/by-path', (req: Request, res: Response) => {
 
 // --- Documents ---
 
-const BASE_DIR = '/opt/team-brain';
+const BASE_DIR = brainRoot();
 const ALLOWED_DOC_DIRS = [
   { dir: '.', files: ['CLAUDE.md'], label: 'Projekt' },
   { dir: 'knowledge/guardian', files: null, label: 'Guardian (Codex)' },

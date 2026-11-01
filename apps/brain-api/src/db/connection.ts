@@ -8,12 +8,15 @@ export function getPool(): Pool {
     if (!connectionString) {
       throw new Error('DATABASE_URL environment variable is not set');
     }
-    pool = new Pool({
-      connectionString,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
-    });
+    const max = Number(process.env.SEO_BRAIN_POOL_MAX || 10);
+    const host = process.env.SEO_BRAIN_PG_HOST;
+    const port = process.env.SEO_BRAIN_PG_PORT;
+    const limits = { max, idleTimeoutMillis: 30000, connectionTimeoutMillis: 5000 };
+    pool = new Pool(
+      host && port
+        ? { host, port: Number(port), database: 'postgres', ...limits }
+        : { connectionString, ...limits },
+    );
     pool.on('connect', (client: PoolClient) => {
       // AGE is loaded by the postmaster via session_preload_libraries on the
       // brain_app role (set by handoff one-liner). Calling LOAD here would

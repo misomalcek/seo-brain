@@ -1,11 +1,12 @@
+import { wwwPath } from '../paths';
 import fs from 'fs';
 import path from 'path';
 import { Response } from 'express';
 
 const ALLOWED_DIRS = [
-  '/var/www/brain/reports/html/',
-  '/var/www/brain/reports/dashboards/',
-  '/var/www/brain/demos/',
+  wwwPath('reports', 'html') + '/',
+  wwwPath('reports', 'dashboards') + '/',
+  wwwPath('demos') + '/',
 ];
 
 const HTML_CSP = "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline' 'self'; img-src 'self' data: https:; frame-ancestors 'self';";

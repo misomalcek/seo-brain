@@ -1,11 +1,12 @@
+import { brainRoot, brainPath } from '../paths';
 import { spawn } from 'child_process';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import crypto from 'crypto';
 import { query as dbQuery, queryOne } from '../db/connection';
 
-const REPORTS_DIR = '/opt/team-brain/reports/mcp';
-const SNAPSHOT_DIR = '/opt/team-brain/ahrefs';
+const REPORTS_DIR = brainPath('reports', 'mcp');
+const SNAPSHOT_DIR = brainPath('ahrefs');
 const MCP_SCRIPT = '/opt/team-brain/apps/brain-api/scripts/mcp-execute.sh';
 
 // Cache TTL per tool type (in hours)
@@ -344,7 +345,7 @@ export async function executeMCPTool(request: MCPRequest, userId?: string): Prom
     // Spawn the MCP script with the prompt
     // The script uses 'script' command to provide a pseudo-TTY
     const proc = spawn(MCP_SCRIPT, [prompt], {
-      cwd: '/opt/team-brain',
+      cwd: brainRoot(),
       env: {
         HOME: '/home/brain-admin',
         USER: 'brain-admin',

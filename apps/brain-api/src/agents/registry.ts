@@ -1,3 +1,4 @@
+import { brainRoot } from '../paths';
 /**
  * AgentRegistry — singleton that bridges TypeScript agent definitions with .md prompt bodies.
  *
@@ -77,7 +78,7 @@ const promptCache = new Map<string, string>();
 
 // ─── Path helpers ─────────────────────────────────────────────────────────────
 
-const TEAM_BRAIN_ROOT = process.env.TEAM_BRAIN_ROOT || '/opt/team-brain';
+const TEAM_BRAIN_ROOT = process.env.TEAM_BRAIN_ROOT || brainRoot();
 const AGENTS_DIR = path.join(TEAM_BRAIN_ROOT, 'agents');
 
 function resolvePromptPath(def: AgentDef): string {

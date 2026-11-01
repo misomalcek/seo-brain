@@ -22,14 +22,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="sk" className="overflow-x-hidden">
+    <html lang="en" className="overflow-x-hidden">
       <body className={`${inter.className} overflow-x-hidden`}>
         {/* Skip navigation link for keyboard/screen reader users */}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-medium"
         >
-          Preskočiť na hlavný obsah
+          Skip to main content
         </a>
         <Providers>
           <main id="main-content" className="min-h-screen bg-background overflow-x-hidden">

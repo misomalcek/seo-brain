@@ -1,10 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { AVAILABLE_TOOLS, WEB_SEARCH_TOOL, SELF_MGMT_TOOL_NAMES } from '../tools/definitions';
+import { WEB_SEARCH_TOOL, SELF_MGMT_TOOL_NAMES } from '../tools/definitions';
 import { isAnyAdmin } from '../middleware/auth';
 import { executeTool } from '../tools/executor';
+import { streamCompatibleChat } from './compatible-chat';
+import { OVERVIEW_RE, selectTurnTools } from './prompt-budget';
+import { freeDomainRatingLine } from './settings';
 import { getSystemPrompt } from './persona';
 import { query } from '../db/connection';
-import { filterTools } from '../agents/registry.js';
 import type { BrainMode } from './mode-controller.js';
 
 // Lazy initialization - client created on first use after dotenv loads
@@ -19,6 +21,10 @@ function getClient(): Anthropic {
     });
   }
   return anthropic;
+}
+
+export function resetAnthropicClient(): void {
+  anthropic = null;
 }
 
 export interface Message {
@@ -150,13 +156,7 @@ const TOKEN_DANGER = 180000;
 // Stream chat with tool use support
 export async function* streamChatWithTools(request: ChatRequest): AsyncGenerator<string | { type: 'tool_use'; name: string; input: any } | RequestMetrics> {
   const startTime = Date.now();
-  console.log('streamChatWithTools called, enableTools:', request.enableTools);
-
-  const client = getClient();
-  const messages: Anthropic.MessageParam[] = request.messages.map(m => ({
-    role: m.role,
-    content: m.content,
-  }));
+  console.log('streamChatWithTools called, enableTools:', request.enableTools, 'mode:', process.env.SEO_BRAIN_ENDPOINT_MODE || 'anthropic');
 
   let continueLoop = true;
   const maxIterations = request.maxIterations || 10;
@@ -167,25 +167,51 @@ export async function* streamChatWithTools(request: ChatRequest): AsyncGenerator
   // exposed manage_agent to any user). Read-only get/list still pass — the executor gates writes.
   const isAdmin = isAnyAdmin(request.userRole);
   const SELF_MGMT: readonly string[] = SELF_MGMT_TOOL_NAMES;
-  let baseTools = request.agentToolIds ? filterTools(request.agentToolIds) : AVAILABLE_TOOLS;
-  if (isAdmin) {
-    const have = new Set(baseTools.map(t => t.name));
-    baseTools = [...baseTools, ...AVAILABLE_TOOLS.filter(t => SELF_MGMT.includes(t.name) && !have.has(t.name))];
-  } else {
+  let baseTools = selectTurnTools(request.agentToolIds, request.messages);
+  if (!isAdmin) {
     baseTools = baseTools.filter(t => !SELF_MGMT.includes(t.name));
   }
 
   // Live-capability line — printed every turn so the model can never hallucinate that a tool
   // it has "doesn't exist" or that a real past tool call "was theater".
   const selfMgmtAvailable = baseTools.filter(t => SELF_MGMT.includes(t.name)).map(t => t.name);
+  const lastUser = request.messages.filter(m => m.role === 'user').slice(-1)[0]?.content || '';
+  const overview = OVERVIEW_RE.test(lastUser);
+  const ratingLine = overview ? await freeDomainRatingLine() : '';
+  const overviewLine = overview ? `
+This is an overview turn. Before the answer, call gsc_search_analytics, ga4_traffic_overview, and lighthouse_audit once each.
+gsc siteUrl is the default Search Console site string in this prompt. dimensions ["query"], rowLimit 8.
+ga4 siteUrl is the default GA4 property id in this prompt.
+lighthouse url is https:// plus the site host, strategy mobile, categories ["performance"].
+Then write the overview from those results and the Ahrefs line below. Do not call Ahrefs tools.` : '';
   const capabilityLine = request.enableTools === false ? '' : `
 
 ## Live capability state (this turn)
 Active agent: ${request.agentId ?? 'base Claude'}. Tools available NOW: ${baseTools.map(t => t.name).join(', ')}.
 Self-management: ${selfMgmtAvailable.length ? `ENABLED via ${selfMgmtAvailable.join(', ')}` : (isAdmin ? 'no self-management tools loaded this turn' : 'disabled for this user')}.
-Past tool results in this conversation are REAL — never claim a tool call you already made "did not happen" or "was theater".`;
+Past tool results in this conversation are REAL — never claim a tool call you already made "did not happen" or "was theater".${overviewLine}
+${ratingLine}`;
 
-  const systemPrompt = getSystemPrompt(request.personaId, request.brandContext, request.memoryContext, request.mode) + capabilityLine;
+  const systemPrompt = getSystemPrompt(
+    request.personaId,
+    request.brandContext,
+    request.memoryContext,
+    request.mode,
+    baseTools.map(t => t.name),
+    lastUser,
+  ) + capabilityLine;
+  console.log(`[prompt] chars=${systemPrompt.length} tools=${baseTools.length} ${baseTools.map(t => t.name).join(',')}`);
+
+  if (process.env.SEO_BRAIN_ENDPOINT_MODE === 'compatible') {
+    yield* streamCompatibleChat(request, baseTools, systemPrompt, startTime);
+    return;
+  }
+
+  const client = getClient();
+  const messages: Anthropic.MessageParam[] = request.messages.map(m => ({
+    role: m.role,
+    content: m.content,
+  }));
 
   // Metrics tracking
   let totalInputTokens = 0;
@@ -256,7 +282,10 @@ Past tool results in this conversation are REAL — never claim a tool call you 
 
     // Only include tools if enabled; baseTools (role-gated) was computed once above.
     if (request.enableTools !== false) {
-      const allTools = [...baseTools, WEB_SEARCH_TOOL as any];
+      const named = new Set(baseTools.map(t => t.name));
+      const allTools = named.has('web_search')
+        ? [...baseTools.filter(t => t.name !== 'web_search'), WEB_SEARCH_TOOL as any]
+        : [...baseTools];
       // OPT-1 cont.: cache_control on LAST tool — Anthropic caches up to and including this block
       if (allTools.length > 0) {
         const lastIdx = allTools.length - 1;
@@ -286,7 +315,7 @@ Past tool results in this conversation are REAL — never claim a tool call you 
             ? Math.min(retryAfterSec * 1000, 60_000)
             : Math.min(5000 * Math.pow(3, retryAttempt - 1), 30_000);
           console.warn(`[Rate Limit] 429 hit, retry ${retryAttempt}/${maxRetries} after ${waitMs}ms`);
-          yield `\n\n⏳ *Rate limit, čakám ${Math.round(waitMs/1000)}s a skúšam znova (${retryAttempt}/${maxRetries})…*\n\n`;
+          yield `\n\nRate limit. Waiting ${Math.round(waitMs / 1000)}s, then retry ${retryAttempt}/${maxRetries}.\n\n`;
           await new Promise((r) => setTimeout(r, waitMs));
           continue;
         }
@@ -297,7 +326,7 @@ Past tool results in this conversation are REAL — never claim a tool call you 
         const isBilling = (status === 400 || status === 403) && /credit|billing|balance/i.test(msg);
         if (isBilling) {
           console.error('[BILLING] Anthropic credit/billing error — chat cannot complete:', msg);
-          yield '\n\n⚠️ *Brain dočasne nemôže odpovedať — vyčerpaný API kredit. Prosím kontaktujte administrátora.*\n\n';
+          yield '\n\nThe Claude account has no remaining credit, so this reply cannot finish.\n\n';
           return;
         }
         throw err;
@@ -435,7 +464,7 @@ Past tool results in this conversation are REAL — never claim a tool call you 
 
   // Emit metrics
   const resolvedModel = resolveModel(request.modelOverride, request.agentModel);
-  const toolsLoaded = request.enableTools !== false ? AVAILABLE_TOOLS.length + 1 : 0; // +1 for WEB_SEARCH_TOOL
+  const toolsLoaded = request.enableTools !== false ? baseTools.length : 0;
   const estimatedContext = estimateTokens(messages, systemPrompt);
   const durationMs = Date.now() - startTime;
 

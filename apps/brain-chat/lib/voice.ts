@@ -3,6 +3,12 @@
  * Free, browser-native, no API keys needed.
  */
 
+let speechLocale = 'en-US';
+
+export function setSpeechLocale(locale: string): void {
+  speechLocale = locale || 'en-US';
+}
+
 // STT — Speech-to-Text
 export function isSTTSupported(): boolean {
   return typeof window !== 'undefined' && !!(
@@ -14,7 +20,7 @@ export function isSTTSupported(): boolean {
 export function startListening(
   onResult: (text: string) => void,
   onEnd: () => void,
-  lang = 'sk-SK'
+  lang = speechLocale
 ): any {
   const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
   if (!SR) return null;
@@ -63,13 +69,13 @@ export function speak(text: string, onEnd?: () => void): void {
 
   const cleaned = stripMarkdown(text);
   const utterance = new SpeechSynthesisUtterance(cleaned);
-  utterance.lang = 'sk-SK';
+  utterance.lang = speechLocale;
   utterance.rate = 1.0;
 
-  // Try to find Slovak voice, fall back to default
   const voices = window.speechSynthesis.getVoices();
-  const skVoice = voices.find(v => v.lang.startsWith('sk'));
-  if (skVoice) utterance.voice = skVoice;
+  const prefix = speechLocale.slice(0, 2).toLowerCase();
+  const match = voices.find(v => v.lang.toLowerCase().startsWith(prefix));
+  if (match) utterance.voice = match;
 
   if (onEnd) utterance.onend = onEnd;
   utterance.onerror = () => onEnd?.();

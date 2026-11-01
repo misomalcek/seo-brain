@@ -1,3 +1,4 @@
+import { brainPath } from '../paths';
 /**
  * Workflow Engine — loads workflow templates, parses variables,
  * and generates prompts for Brain to execute step by step.
@@ -6,7 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const WORKFLOW_DIR = '/opt/team-brain/templates/workflow';
+const WORKFLOW_DIR = brainPath('templates', 'workflow');
 
 export interface WorkflowVariable {
   name: string;

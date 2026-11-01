@@ -1,3 +1,4 @@
+import { brainPath } from '../paths';
 // ============================================================
 // file-reader.ts — read_user_file tool backend
 // Lets Brain read its own exports (CSV primarily, also JSON/MD/TXT/XLSX)
@@ -191,7 +192,7 @@ function evaluateClause(row: Record<string, any>, clause: FilterClause): boolean
 
 // ---------- Main: readUserFile ----------
 
-const ALLOWED_ROOT = '/opt/team-brain/uploads';
+const ALLOWED_ROOT = brainPath('uploads');
 
 async function resolveFileRecord(filename: string, userId: string): Promise<{
   storage_path: string;

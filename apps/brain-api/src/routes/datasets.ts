@@ -1,3 +1,4 @@
+import { brainPath } from '../paths';
 import { Router, Request, Response } from 'express';
 import { query, queryOne } from '../db/connection';
 import multer from 'multer';
@@ -5,7 +6,7 @@ import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
 
-const DATASETS_DIR = '/opt/team-brain/datasets/custom';
+const DATASETS_DIR = brainPath('datasets', 'custom');
 
 const userDatasetStorage = multer.diskStorage({
   destination: (_req, _file, cb) => {

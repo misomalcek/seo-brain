@@ -1,9 +1,10 @@
+import { brainPath, wwwPath } from '../paths';
 import { query, queryOne } from '../db/connection';
 import fs from 'fs';
 import path from 'path';
 
-const REPORTS_DIR = '/opt/team-brain/reports/mcp';
-const DASHBOARDS_DIR = '/var/www/brain/reports/dashboards';
+const REPORTS_DIR = brainPath('reports', 'mcp');
+const DASHBOARDS_DIR = process.env.SEO_BRAIN_DASHBOARDS || wwwPath('reports', 'dashboards');
 
 if (!fs.existsSync(DASHBOARDS_DIR)) {
   fs.mkdirSync(DASHBOARDS_DIR, { recursive: true });

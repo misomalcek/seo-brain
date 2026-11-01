@@ -1,3 +1,4 @@
+import { brainPath } from '../paths';
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
@@ -7,7 +8,7 @@ import { query, queryOne } from '../db/connection';
 import { isAnyAdmin } from '../middleware/auth';
 import { generateFile, detectBestFormats, type GenerateFormat } from '../services/file-generator';
 
-const FILES_DIR = process.env.FILES_DIR || '/opt/team-brain/user-files';
+const FILES_DIR = process.env.FILES_DIR || brainPath('user-files');
 
 // Ensure base directory exists
 if (!fs.existsSync(FILES_DIR)) {

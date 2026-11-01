@@ -1,3 +1,4 @@
+import { brainPath, wwwPath } from '../paths';
 import { Router, Request, Response } from 'express';
 import { query, queryOne } from '../db/connection';
 import { generateHTMLReport } from '../services/report-generator';
@@ -7,7 +8,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
-const REPORTS_DIR = '/var/www/brain/reports/html';
+const REPORTS_DIR = process.env.SEO_BRAIN_HTML_REPORTS || wwwPath('reports', 'html');
 
 // Ensure directory exists
 if (!fs.existsSync(REPORTS_DIR)) {
@@ -45,7 +46,7 @@ htmlReportsRouter.post('/generate', async (req: Request, res: Response) => {
     // Use provided data sources or empty array
     const resolvedSources: Array<{ name: string; data: any }> = (dataSources || []).map(ds => {
       if (ds.data === null && ds.name) {
-        const reportPath = path.join('/opt/team-brain/reports/mcp', ds.name);
+        const reportPath = path.join(brainPath('reports', 'mcp'), ds.name);
         if (fs.existsSync(reportPath)) {
           try {
             return { name: ds.name, data: JSON.parse(fs.readFileSync(reportPath, 'utf8')) };

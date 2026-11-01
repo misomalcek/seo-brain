@@ -1,9 +1,10 @@
+import { brainPath } from '../paths';
 import { Router, Request, Response } from 'express';
 import { query, queryOne } from '../db/connection';
 import fs from 'fs';
 import path from 'path';
 
-const REPORTS_DIR = '/opt/team-brain/reports/mcp';
+const REPORTS_DIR = brainPath('reports', 'mcp');
 
 export const reportsRouter = Router();
 

@@ -26,7 +26,7 @@ export const authRouter = Router();
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
+  secure: process.env.NODE_ENV === 'production' && process.env.SEO_BRAIN_DESKTOP !== '1',
   sameSite: 'lax' as const,
   path: '/',
 };

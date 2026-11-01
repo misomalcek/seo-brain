@@ -21,6 +21,9 @@
   "description": "Claude API backend for Team Brain Dashboard",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
+    "@electric-sql/pglite": "0.5.10",
+    "@electric-sql/pglite-pgvector": "0.0.11",
+    "@electric-sql/pglite-socket": "0.2.13",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/multer": "^2.0.0",

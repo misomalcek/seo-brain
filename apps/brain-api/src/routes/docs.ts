@@ -1,10 +1,11 @@
+import { brainPath } from '../paths';
 import { Router, Request, Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
 
 export const docsRouter = Router();
 
-const DOCS_DIR = '/opt/team-brain/docs';
+const DOCS_DIR = brainPath('docs');
 
 interface DocFile {
   path: string; // relative path from docs/

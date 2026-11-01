@@ -39,6 +39,8 @@ import { ContextSearch } from '@/components/ContextSearch';
 import { UserProfile } from '@/components/UserProfile';
 import { TimelineScrollbar } from '@/components/TimelineScrollbar';
 import { ForcePasswordChange } from '@/components/ForcePasswordChange';
+import { SettingsPanel } from '@/components/panels/SettingsPanel';
+import { useI18n } from '@/lib/i18n';
 import type { AgentInfo, UserFile } from '@/lib/types';
 
 // Panel registry — single source of truth for overlay titles and icons
@@ -67,6 +69,7 @@ const PANEL_REGISTRY: Record<string, { title: string; icon: string }> = {
 
 export default function ChatPage() {
   const { loading: authLoading, isAuthenticated, mustChangePassword } = useAuth();
+  const { t } = useI18n();
   const [showProfile, setShowProfile] = useState(false);
 
   if (authLoading) {
@@ -76,7 +79,7 @@ export default function ChatPage() {
           <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
             <span className="text-2xl">🧠</span>
           </div>
-          <p className="text-muted-foreground text-sm">Načítavam...</p>
+          <p className="text-muted-foreground text-sm">{t('loading')}</p>
         </div>
       </div>
     );
@@ -99,6 +102,7 @@ export default function ChatPage() {
 
 function ChatContent() {
   const { user } = useAuth();
+  const { t } = useI18n();
   const { addToast } = useToast();
   const [toolInput, setToolInput] = useState('');
   const [isToolLoading, setIsToolLoading] = useState(false);
@@ -364,7 +368,7 @@ function ChatContent() {
             <button
               onClick={() => openOverlay('profile')}
               className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold cursor-pointer hover:accent-glow transition-shadow shrink-0"
-              title={user?.name || 'Profil'}
+              title={user?.name || t('profile')}
             >
               {user?.name ? user.name.charAt(0).toUpperCase() : '?'}
             </button>
@@ -378,7 +382,7 @@ function ChatContent() {
             <button
               onClick={() => openOverlay('search')}
               className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-              title="Hľadať (Ctrl+K)"
+              title={t('search')}
             >
               <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -387,7 +391,7 @@ function ChatContent() {
             {/* Help icon — #20 (2026-04-29): replaced tiny "?" in faint circle with
                 Lucide LifeBuoy — internationally recognized "help/support" symbol,
                 more distinctive than yet-another-circle, larger + thicker stroke. */}
-            <button onClick={() => openOverlay('docs')} className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center" title="Pomoc / Dokumentácia">
+            <button onClick={() => openOverlay('docs')} className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center" title={t('help')}>
               <svg className="h-[20px] w-[20px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <circle cx="12" cy="12" r="10"/>
                 <circle cx="12" cy="12" r="4"/>
@@ -400,10 +404,22 @@ function ChatContent() {
               <button
                 onClick={() => openOverlay('users')}
                 className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-                title="Používatelia"
+                title={t('users')}
               >
                 <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                </svg>
+              </button>
+            )}
+            {user?.role === 'admin' && (
+              <button
+                onClick={() => openOverlay('settings')}
+                className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-surface-hover transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+                title={t('settings')}
+              >
+                <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                 </svg>
               </button>
             )}
@@ -447,8 +463,8 @@ function ChatContent() {
                           await fetch(`/api/jobs/${jobId}`, { method: 'DELETE', credentials: 'include' });
                           setMessages(prev => prev.filter(m => m.backgroundJobId !== jobId));
                           setPendingJobs(prev => prev.filter(j => j.id !== jobId));
-                          addToast('Background task zrušený', 'success');
-                        } catch { addToast('Nepodarilo sa zrušiť task', 'error'); }
+                          addToast(t('cancelled'), 'success');
+                        } catch { addToast(t('cancelFailed'), 'error'); }
                       } : undefined}
                       silentMode={silentMode}
                       onSilentModeChange={setSilentMode}
@@ -479,13 +495,13 @@ function ChatContent() {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-60" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500" />
                     </span>
-                    Brain spracúva...
+                    {t('working')}
                   </span>
                   <button
                     onClick={convertToBackground}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/15 hover:bg-amber-500/30 transition-colors font-medium cursor-pointer"
                   >
-                    ⚡ Poslať na pozadie
+                    {t('background')}
                   </button>
                 </div>
               )}
@@ -501,7 +517,7 @@ function ChatContent() {
                 <FeatureOverlay
                   isOpen={true}
                   onClose={closeOverlay}
-                  title={PANEL_REGISTRY[activeOverlay]?.title || 'Brain'}
+                  title={activeOverlay ? t(`panel.${activeOverlay}`) : 'SEO Brain'}
                   icon={PANEL_REGISTRY[activeOverlay]?.icon || '🧠'}
                 >
                   {/* New clean panels */}
@@ -574,6 +590,9 @@ function ChatContent() {
                   )}
                   {activeOverlay === 'users' && (
                     <UsersPanel />
+                  )}
+                  {activeOverlay === 'settings' && user?.role === 'admin' && (
+                    <SettingsPanel />
                   )}
                 </FeatureOverlay>
               )}

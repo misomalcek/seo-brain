@@ -23,6 +23,7 @@ export type OverlayType =
   | 'data-viewer'
   | 'graph'
   | 'users'
+  | 'settings'
   | null;
 
 /**

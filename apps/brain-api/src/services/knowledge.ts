@@ -1,10 +1,11 @@
+import { brainRoot } from '../paths';
 import * as fs from 'fs';
 import * as path from 'path';
 import { AVAILABLE_TOOLS } from '../tools/definitions';
 import { agentRegistry } from '../agents/registry.js';
 import { resolveAbsorbed } from '../agents/definitions.js';
 
-const TEAM_BRAIN_ROOT = '/opt/team-brain';
+const TEAM_BRAIN_ROOT = brainRoot();
 const AGENTS_DIR = path.join(TEAM_BRAIN_ROOT, 'agents');
 const SKILLS_DIR = path.join(TEAM_BRAIN_ROOT, 'agents'); // v1.3.1: skills merged into agents/
 const FRAMEWORKS_DIR = path.join(TEAM_BRAIN_ROOT, 'templates');

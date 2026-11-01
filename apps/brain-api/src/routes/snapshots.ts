@@ -1,3 +1,4 @@
+import { brainPath } from '../paths';
 import { Router, Request, Response } from 'express';
 import { getLatestAhrefsSnapshot, getAhrefsSnapshotHistory, generateAllAhrefsSnapshots, runDueSnapshots } from '../services/ahrefs-snapshot';
 import { query, queryOne } from '../db/connection';
@@ -25,7 +26,7 @@ snapshotsRouter.get('/:type/:id/download', async (req: Request, res: Response) =
       const dateStr = fmtDate(row.snapshot_date);
 
       // Try exact date CSV, then find latest CSV for this domain
-      const snapshotsDir = '/opt/team-brain/reports/snapshots';
+      const snapshotsDir = brainPath('reports', 'snapshots');
       let csvPath = `${snapshotsDir}/gsc-${row.domain}-${dateStr}.csv`;
 
       if (!fs.existsSync(csvPath)) {
@@ -313,7 +314,7 @@ snapshotsRouter.get('/gsc/:id/content', async (req: Request, res: Response) => {
     // Try to read full JSON file
     const domainSlug = row.domain.replace(/\./g, '-');
     const dateStr = fmtDate(row.snapshot_date);
-    const jsonFile = path.join('/opt/team-brain/reports/mcp', `gsc_snapshot_${domainSlug}_${dateStr}.json`);
+    const jsonFile = path.join(brainPath('reports', 'mcp'), `gsc_snapshot_${domainSlug}_${dateStr}.json`);
     let content = '';
     if (fs.existsSync(jsonFile)) {
       try {

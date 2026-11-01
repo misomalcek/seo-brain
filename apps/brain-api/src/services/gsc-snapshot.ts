@@ -1,3 +1,4 @@
+import { brainPath } from '../paths';
 /**
  * GSC Snapshot Generator
  *
@@ -13,7 +14,7 @@ import path from 'path';
 import { searchAnalytics } from './gsc-api';
 import { query as dbQuery } from '../db/connection';
 
-const SNAPSHOT_DIR = '/opt/team-brain/reports/mcp';
+const SNAPSHOT_DIR = brainPath('reports', 'mcp');
 
 // GSC property URLs — loaded dynamically from sites table
 import { getTrackedDomains } from '../config/domain-config';

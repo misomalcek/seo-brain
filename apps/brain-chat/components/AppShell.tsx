@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useI18n } from '@/lib/i18n';
 
 /**
  * Theme system 2026-04-28 — 3-state (light/dark/auto):
@@ -34,6 +35,7 @@ export function applyThemeMode(mode: ThemeMode): void {
 /** ThemeSelector — 3-button row (Light / Dark / Auto). Used in UserProfileModal. */
 export function ThemeSelector() {
   const [mode, setMode] = useState<ThemeMode>('auto');
+  const { t } = useI18n();
 
   useEffect(() => {
     setMode(getStoredThemeMode());
@@ -50,18 +52,18 @@ export function ThemeSelector() {
 
   // #11 (2026-04-29): icons bumped h-4→h-[18px] + strokeWidth 2→2.2 for visibility
   const opts: { id: ThemeMode; label: string; icon: React.ReactNode }[] = [
-    { id: 'light', label: 'Svetlý', icon: (
+    { id: 'light', label: t('light'), icon: (
       <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
         <circle cx="12" cy="12" r="4"/>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
       </svg>
     ) },
-    { id: 'dark', label: 'Tmavý', icon: (
+    { id: 'dark', label: t('dark'), icon: (
       <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
       </svg>
     ) },
-    { id: 'auto', label: 'Auto', icon: (
+    { id: 'auto', label: t('auto'), icon: (
       <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
         <rect x="2" y="4" width="20" height="14" rx="2"/>
         <path strokeLinecap="round" strokeLinejoin="round" d="M8 21h8M12 17v4"/>

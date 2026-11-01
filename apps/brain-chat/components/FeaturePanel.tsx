@@ -1,6 +1,7 @@
 'use client';
 
 import type { OverlayType } from '@/hooks/useOverlays';
+import { useI18n } from '@/lib/i18n';
 
 interface FeaturePanelProps {
   activeOverlay: OverlayType;
@@ -77,7 +78,11 @@ const features: { id: OverlayType; label: string; color: DockColor; icon: React.
 ];
 
 export function FeaturePanel({ activeOverlay, onFeatureClick, isAdmin }: FeaturePanelProps) {
-  const visibleFeatures = isAdmin ? features : features.filter(f => !f.adminOnly);
+  const { t, features: flags } = useI18n();
+  const visibleFeatures = features.filter(f => {
+    if (!isAdmin && f.adminOnly) return false;
+    return flags[f.id as string] !== false;
+  });
 
   return (
     <div className="shrink-0 flex justify-start sm:justify-center py-2 px-2 sm:px-0 overflow-x-auto scrollbar-none">
@@ -94,16 +99,16 @@ export function FeaturePanel({ activeOverlay, onFeatureClick, isAdmin }: Feature
               key={feature.id}
               onClick={() => onFeatureClick(feature.id)}
               className={`dock-item group ${isActive ? 'active' : ''}`}
-              aria-label={feature.label}
+              aria-label={t(`dock.${feature.id}`)}
               role="tab"
               aria-selected={isActive}
-              title={feature.label}
+              title={t(`dock.${feature.id}`)}
             >
               <span className={`dock-jewel ${c.iconBg} ${c.icon} ${isActive ? `${c.active} ${c.glow}` : ''}`}>
                 {feature.icon}
               </span>
               <span className={`hidden sm:inline whitespace-nowrap text-[11px] font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'} transition-colors`}>
-                {feature.label}
+                {t(`dock.${feature.id}`)}
               </span>
             </button>
           );

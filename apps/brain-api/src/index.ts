@@ -1,3 +1,4 @@
+import { wwwPath } from './paths';
 // Load environment variables FIRST
 import './env';
 
@@ -8,6 +9,7 @@ import path from 'path';
 import { runMigrations } from './db/migrations';
 import { testConnection, query as dbQuery } from './db/connection';
 import { requireAuth } from './middleware/auth';
+import { publicSettings } from './services/settings';
 import { cleanExpiredCache } from './services/mcp-bridge';
 import { validateAgentTools } from './services/knowledge';
 
@@ -24,11 +26,28 @@ app.use(cors({
 app.use(express.json({ limit: '20mb' }));
 app.use(cookieParser());
 
+// The server edition strips /api in nginx. The desktop process serves the
+// static chat itself, so it strips the same prefix before the routers.
+if (process.env.SEO_BRAIN_DESKTOP === '1') {
+  app.use((req, _res, next) => {
+    const url = req.url || '';
+    if (url === '/api' || url.startsWith('/api/') || url.startsWith('/api?')) {
+      const stripped = url.replace(/^\/api/, '') || '/';
+      req.url = stripped.startsWith('/') ? stripped : `/${stripped}`;
+    }
+    next();
+  });
+}
+
 // Security headers
 app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   next();
+});
+
+app.get('/settings/public', (_req, res) => {
+  res.json(publicSettings());
 });
 
 // Health check with database status + agent validation + AGE probe
@@ -95,13 +114,21 @@ process.on('uncaughtException', (err) => {
 });
 
 async function start() {
+  if (process.env.SEO_BRAIN_DESKTOP === '1') {
+    const { startDesktopDatabase } = await import('./db/desktop');
+    await startDesktopDatabase();
+  }
+
   // Initialize database
   if (process.env.DATABASE_URL) {
     try {
       await runMigrations();
       console.log('Database: connected and migrations applied');
+      const { loadSettings } = await import('./services/settings');
+      await loadSettings();
     } catch (error) {
       console.error('Database initialization failed:', error);
+      if (process.env.SEO_BRAIN_DESKTOP === '1') throw error;
       console.log('Continuing without database (chat history will not be available)');
     }
   } else {
@@ -200,12 +227,16 @@ async function start() {
   app.use('/vector', requireAuth, vectorRouter);
   // Mount /graph/age BEFORE /graph — Express matches in registration order
   // and graphRouter has no /age/* handlers (returns 404 instead of falling through).
-  app.use('/graph/age', requireAuth, ageGraphRouter);
+  if (process.env.SEO_BRAIN_DESKTOP !== '1') {
+    app.use('/graph/age', requireAuth, ageGraphRouter);
+  }
   app.use('/graph', requireAuth, graphRouter);
   app.use('/snippets', requireAuth, snippetsRouter);
+  const { settingsRouter } = await import('./routes/settings');
+  app.use('/admin/settings', settingsRouter);
 
   // Demos - static HTML files behind auth
-  const DEMOS_DIR = '/var/www/brain/demos';
+  const DEMOS_DIR = wwwPath('demos');
   app.get('/demos/:filename', requireAuth, (req, res) => {
     const filename = path.basename(req.params.filename as string);
     if (!filename.endsWith('.html')) {
@@ -290,6 +321,17 @@ async function start() {
   // Start server
   // Validate agent tool references at startup
   validateAgentTools();
+
+  if (process.env.SEO_BRAIN_DESKTOP === '1' && process.env.SEO_BRAIN_CHAT_DIST) {
+    const dist = process.env.SEO_BRAIN_CHAT_DIST;
+    app.use(express.static(dist));
+    app.use((req, res, next) => {
+      if (req.method !== 'GET') return next();
+      const accept = req.headers.accept || '';
+      if (!accept.includes('text/html') && accept !== '*/*') return next();
+      res.sendFile(path.join(dist, 'index.html'), (err) => (err ? next() : undefined));
+    });
+  }
 
   app.listen(PORT, () => {
     console.log(`Brain API running on port ${PORT}`);

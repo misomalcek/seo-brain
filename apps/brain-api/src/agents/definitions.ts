@@ -165,6 +165,8 @@ const TOOLS_WEB = [
   // so listing it here would cause false-positive "unknown tool" warnings without benefit.
   'web_fetch',
   'web_render',
+  'google_organic',
+  'google_ai_mode',
 ];
 
 const TOOLS_UTILITY = [
@@ -187,7 +189,7 @@ const TOOLS_VECTOR = [
   'context_search',
   'articles_search',
   'articles_similar',
-  'knowledge_graph_query',
+  ...(process.env.SEO_BRAIN_DESKTOP === '1' ? [] : ['knowledge_graph_query']),
 ];
 
 /** GA4 traffic + realtime analytics + Run T expansion (15 tools total) */
@@ -306,6 +308,8 @@ export const AGENTS: Record<AgentId, AgentDef> = {
       // GSC + GA4 (gsc_compare_periods now in TOOLS_GSC constant — no explicit dup)
       ...TOOLS_GSC,
       ...TOOLS_GA4,
+      'google_organic',
+      'google_ai_mode',
       // Utility
       'suggest_ahrefs_export',
       'save_user_file',

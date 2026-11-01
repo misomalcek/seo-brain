@@ -1,3 +1,4 @@
+import { brainPath, wwwPath } from '../paths';
 import { Router, Request, Response } from 'express';
 import { query, queryOne } from '../db/connection';
 import { serveHtmlFile } from '../services/html-content';
@@ -6,8 +7,8 @@ import path from 'path';
 import crypto from 'crypto';
 import { generateSEODashboard, generateContentDashboard, generateCEODashboard, generateKeywordOpportunitiesDashboard, generateSiteAuditDashboard, generateLinkProfileDashboard, generateVisibilityDashboard } from '../services/dashboard-generator';
 
-const REPORTS_DIR = '/opt/team-brain/reports/mcp';
-const DASHBOARDS_DIR = '/var/www/brain/reports/dashboards';
+const REPORTS_DIR = brainPath('reports', 'mcp');
+const DASHBOARDS_DIR = wwwPath('reports', 'dashboards');
 
 export const dashboardsRouter = Router();
 

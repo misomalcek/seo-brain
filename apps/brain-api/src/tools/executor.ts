@@ -1,3 +1,4 @@
+import { brainPath } from '../paths';
 // Tool executor - executes tools and returns results
 // Uses MCP Bridge to access Ahrefs tools via Claude Code CLI
 
@@ -371,7 +372,7 @@ const toolExecutors: Record<string, (input: any) => Promise<ToolResult>> = {
         const csv = [header, ...csvRows].join('\n');
 
         // Save directly to disk
-        const uploadsDir = '/opt/team-brain/uploads';
+        const uploadsDir = brainPath('uploads');
         await fs.mkdir(uploadsDir, { recursive: true });
         const userId = _currentUserId || 'system';
         const timestamp = Date.now();
@@ -799,10 +800,11 @@ const toolExecutors: Record<string, (input: any) => Promise<ToolResult>> = {
   async ga4_traffic_overview(input: { siteUrl: string; startDate?: string; endDate?: string }): Promise<ToolResult> {
     try {
       const { trafficOverview, getGA4PropertyMap } = await import('../services/ga4-api.js');
+      const { ga4PropertyForHost } = await import('../services/settings.js');
       let propertyId = input.siteUrl;
       if (!/^\d+$/.test(propertyId)) {
         const map = await getGA4PropertyMap();
-        const resolved = map[input.siteUrl] || map[input.siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')];
+        const resolved = map[input.siteUrl] || map[input.siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')] || ga4PropertyForHost(input.siteUrl);
         if (!resolved) {
           return { success: false, error: `No GA4 property mapped for "${input.siteUrl}". Add ga4_property_id to sites table.` };
         }
@@ -1827,7 +1829,7 @@ const toolExecutors: Record<string, (input: any) => Promise<ToolResult>> = {
       const { buffer, mimeType, extension } = await generateFile(input.data, input.format as any);
 
       // Ensure uploads directory exists
-      const uploadsDir = '/opt/team-brain/uploads';
+      const uploadsDir = brainPath('uploads');
       await fs.mkdir(uploadsDir, { recursive: true });
 
       // Create unique filename with timestamp
@@ -2246,6 +2248,9 @@ const toolExecutors: Record<string, (input: any) => Promise<ToolResult>> = {
     node?: string; depth?: number;
     fromNode?: string; toNode?: string; maxDepth?: number;
   }): Promise<ToolResult> {
+    if (process.env.SEO_BRAIN_DESKTOP === '1') {
+      return { success: false, error: 'knowledge_graph_query needs the server edition.' };
+    }
     try {
       const { query: dbQuery } = await import('../db/connection');
 
@@ -2391,6 +2396,38 @@ const toolExecutors: Record<string, (input: any) => Promise<ToolResult>> = {
       };
     } catch (err: any) {
       return { success: false, error: `code_execute failed: ${err?.message ?? String(err)}`, data: { duration_ms: Date.now() - t0 } };
+    }
+  },
+
+  async cloudflare_zone_analytics(input: { domain: string; days?: number }): Promise<ToolResult> {
+    try {
+      const { zoneIdFor, zoneTraffic } = await import('../services/cloudflare-analytics.js');
+      const token = process.env.CLOUDFLARE_API_TOKEN || '';
+      if (!token.trim()) return { success: false, error: 'Cloudflare token is empty. Add it in Settings and run Check.' };
+      const domain = String(input.domain || '').trim();
+      const zoneId = await zoneIdFor(token, domain);
+      const traffic = await zoneTraffic(token, zoneId, domain, Number(input.days || 7));
+      return { success: true, data: traffic };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async google_organic(input: { query: string; gl?: string; hl?: string; num?: number }): Promise<ToolResult> {
+    try {
+      const { googleOrganic } = await import('../services/serpapi.js');
+      return { success: true, data: await googleOrganic(input) };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
+    }
+  },
+
+  async google_ai_mode(input: { query: string }): Promise<ToolResult> {
+    try {
+      const { googleAiMode } = await import('../services/serpapi.js');
+      return { success: true, data: await googleAiMode(input) };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   },
 };

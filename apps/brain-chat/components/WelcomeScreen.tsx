@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/lib/auth-context';
+import { useI18n } from '@/lib/i18n';
 import type { ConversationSummary } from '@/lib/api';
 
 interface WelcomeScreenProps {
@@ -17,11 +18,11 @@ const PROMPT_CARDS: { category: string; catColor: string; label: string; prompt:
   { category: 'Článok', catColor: 'bg-amber-500', label: 'SEO brief s keyword research', prompt: 'Vytvor brief pre nový článok od nuly', desc: 'Nový článok od nuly' },
 ];
 
-function getGreeting(): string {
+function getGreeting(t: (key: string) => string): string {
   const h = new Date().getHours();
-  if (h < 12) return 'Dobré ráno';
-  if (h < 18) return 'Dobrý deň';
-  return 'Dobrý večer';
+  if (h < 12) return t('greetingMorning');
+  if (h < 18) return t('greetingDay');
+  return t('greetingEvening');
 }
 
 function timeAgo(dateStr: string): string {
@@ -40,6 +41,7 @@ export function WelcomeScreen({
   onSelectConversation,
 }: WelcomeScreenProps) {
   const { user } = useAuth();
+  const { t } = useI18n();
   const recentConversations = conversations.slice(0, 3);
   const firstName = user?.name?.split(' ')[0] || '';
 
@@ -54,10 +56,10 @@ export function WelcomeScreen({
 
       {/* Greeting */}
       <h1 className="text-[22px] font-semibold text-foreground tracking-tight mb-1">
-        {getGreeting()}{firstName ? `, ${firstName}` : ''}
+        {getGreeting(t)}{firstName ? `, ${firstName}` : ''}
       </h1>
       <p className="text-sm text-muted-foreground mb-8">
-        Ako ti dnes môžem pomôcť?
+        {t('welcomeHint')}
       </p>
 
       {/* Prompt cards REMOVED 2026-04-27 per user feedback — clean focused welcome.

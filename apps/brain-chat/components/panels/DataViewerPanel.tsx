@@ -11,6 +11,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PanelError } from '@/components/ui/PanelError';
 import { getAdminHealth, getAdminStats, type AdminHealth, type AdminStats } from '@/lib/api';
+import { useI18n } from '@/lib/i18n';
 
 interface ObservabilitySummary {
   runs_24h: string;
@@ -68,9 +69,9 @@ function fmt(ms: number) {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-function fmtDate(iso: string) {
+function fmtDate(iso: string, locale = 'en-GB') {
   const d = new Date(iso);
-  return d.toLocaleString('sk-SK', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleString(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function fmtNum(n: string | number) {
@@ -100,6 +101,8 @@ export function DataViewerPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('runs');
+  const { t, lang } = useI18n();
+  const dateLocale = lang === 'cs' ? 'cs-CZ' : lang === 'de' ? 'de-DE' : lang === 'sk' ? 'sk-SK' : 'en-GB';
 
   const load = useCallback(() => {
     setLoading(true);
@@ -115,16 +118,16 @@ export function DataViewerPanel() {
         setSystemHealth(health);
         setSystemStats(stats);
       })
-      .catch(e => setError(e.message || 'Nepodarilo sa načítať dáta'))
+      .catch(e => setError(e.message || t('obsError')))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   useEffect(() => { load(); }, [load]);
 
   if (loading) return (
     <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
       <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin mr-2" />
-      Načítavam...
+      {t('loading')}
     </div>
   );
   if (error) return <PanelError message={error} onRetry={load} />;
@@ -144,15 +147,15 @@ export function DataViewerPanel() {
     <div className="flex flex-col h-full min-h-0">
       {/* Stats grid */}
       <div className="grid grid-cols-3 gap-2 px-4 pt-3 pb-2 shrink-0">
-        <StatCard label="Agent runs 24h" value={fmtNum(summary.runs_24h)} sub={`${fmtNum(summary.runs_7d)} za 7 dní`} />
-        <StatCard label="Tool calls 24h" value={fmtNum(summary.tool_calls_24h)} sub={`${fmtNum(summary.tool_calls_7d)} za 7 dní`} />
-        <StatCard label="Tokeny 7d" value={fmtNum(summary.tokens_7d)} sub={`${fmtNum(summary.failures_7d)} zlyhaní`} />
+        <StatCard label={t('runs24')} value={fmtNum(summary.runs_24h)} sub={`${fmtNum(summary.runs_7d)} ${t('in7')}`} />
+        <StatCard label={t('tools24')} value={fmtNum(summary.tool_calls_24h)} sub={`${fmtNum(summary.tool_calls_7d)} ${t('in7')}`} />
+        <StatCard label={t('tokens7')} value={fmtNum(summary.tokens_7d)} sub={`${fmtNum(summary.failures_7d)} ${t('failures')}`} />
       </div>
 
       {/* Top tools bar chart */}
       {topTools.length > 0 && (
         <div className="px-4 pb-3 shrink-0">
-          <div className="text-[11px] font-medium text-muted-foreground mb-2">Top nástroje (7d)</div>
+          <div className="text-[11px] font-medium text-muted-foreground mb-2">{t('topTools')}</div>
           <div className="space-y-1.5">
             {topTools.map(([name, count]) => (
               <div key={name} className="flex items-center gap-2">
@@ -172,7 +175,7 @@ export function DataViewerPanel() {
 
       {/* Tab switcher */}
       <div className="flex items-center gap-1.5 px-4 pb-2 shrink-0">
-        {([['runs', 'Agent runs'], ['tools', 'Tool calls'], ['system', 'Systém']] as [Tab, string][]).map(([id, label]) => (
+        {([['runs', t('tabRuns')], ['tools', t('tabTools')], ['system', t('tabSystem')]] as [Tab, string][]).map(([id, label]) => (
           <button
             key={id}
             onClick={() => setTab(id)}
@@ -195,7 +198,7 @@ export function DataViewerPanel() {
               <div key={i} className={`rounded-xl border p-2.5 ${r.success ? 'bg-card border-border' : 'bg-red-500/5 border-red-500/20'}`}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[11px] font-medium text-foreground">{r.agent_id || 'base'}</span>
-                  <span className="text-[10px] text-muted-foreground">{fmtDate(r.ran_at)}</span>
+                  <span className="text-[10px] text-muted-foreground">{fmtDate(r.ran_at, dateLocale)}</span>
                 </div>
                 <div className="flex items-center gap-3 text-[10px] text-muted-foreground flex-wrap">
                   <span className="text-blue-500/80">{r.model_used?.split('-').slice(-2).join('-') || '—'}</span>
@@ -208,7 +211,7 @@ export function DataViewerPanel() {
               </div>
             ))}
             {recent_runs.length === 0 && (
-              <div className="text-center py-8 text-sm text-muted-foreground">Žiadne runy za 7 dní</div>
+              <div className="text-center py-8 text-sm text-muted-foreground">{t('noRuns')}</div>
             )}
           </div>
         )}
@@ -218,7 +221,7 @@ export function DataViewerPanel() {
               <div key={i} className={`rounded-xl border p-2.5 ${t.success ? 'bg-card border-border' : 'bg-red-500/5 border-red-500/20'}`}>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[11px] font-medium text-foreground">{t.tool_name}</span>
-                  <span className="text-[10px] text-muted-foreground">{fmtDate(t.called_at)}</span>
+                  <span className="text-[10px] text-muted-foreground">{fmtDate(t.called_at, dateLocale)}</span>
                 </div>
                 <div className="flex items-center gap-3 text-[10px] text-muted-foreground flex-wrap">
                   <span>{t.agent_id || '—'}</span>
