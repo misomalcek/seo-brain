@@ -30,7 +30,7 @@
     "@types/node": "^25.0.10",
     "@types/pg": "^8.16.0",
     "@types/turndown": "^5.0.6",
-    "@huggingface/transformers": "^3.8.1",
+    "@huggingface/transformers": "^4.3.2",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
