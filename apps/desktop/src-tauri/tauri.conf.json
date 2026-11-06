@@ -1,6 +1,6 @@
 {
   "productName": "SEO Brain",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "com.misomalcek.seo-brain",
   "build": {
     "frontendDist": "../ui",
@@ -8,7 +8,15 @@
     "beforeBuildCommand": "node ../../scripts/stage-desktop.mjs"
   },
   "app": {
-    "windows": [],
+    "windows": [
+      {
+        "label": "main",
+        "title": "SEO Brain",
+        "url": "index.html",
+        "width": 1280,
+        "height": 800
+      }
+    ],
     "security": {
       "csp": null
     }
@@ -25,7 +33,8 @@
     ],
     "resources": {
       "resources/brain-api/": "brain-api/",
-      "resources/brain-chat/": "brain-chat/"
+      "resources/brain-chat/": "brain-chat/",
+      "resources/node/": "node/"
     },
     "macOS": {
       "signingIdentity": "-"

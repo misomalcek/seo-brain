@@ -14,7 +14,7 @@ export function getPool(): Pool {
     const limits = { max, idleTimeoutMillis: 30000, connectionTimeoutMillis: 5000 };
     pool = new Pool(
       host && port
-        ? { host, port: Number(port), database: 'postgres', ...limits }
+        ? { host, port: Number(port), user: 'postgres', database: 'postgres', ...limits }
         : { connectionString, ...limits },
     );
     pool.on('connect', (client: PoolClient) => {

@@ -1,4 +1,4 @@
--- Migration 015: Background jobs queue
+-- Migration 044 (was 015, sat outside src/db/migrations and never ran): background jobs queue
 -- Stores async Claude API jobs that run server-side with polling notifications
 
 CREATE TABLE IF NOT EXISTS background_jobs (

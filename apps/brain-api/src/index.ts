@@ -39,6 +39,33 @@ if (process.env.SEO_BRAIN_DESKTOP === '1') {
   });
 }
 
+// Desktop is one person on one machine, and the API listens on 127.0.0.1 only.
+// There is no account to log in to (the seeded admin has no password and
+// registration needs an admin), so the local user is signed in automatically.
+if (process.env.SEO_BRAIN_DESKTOP === '1') {
+  app.use(async (req, res, next) => {
+    try {
+      const { verifyAccessToken, generateAccessToken } = await import('./services/auth');
+      const bearer = req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : undefined;
+      const cookie = /(?:^|;\s*)access_token=([^;]*)/.exec(req.headers.cookie || '')?.[1];
+      if ((bearer && verifyAccessToken(bearer)) || (cookie && verifyAccessToken(cookie))) return next();
+      if (!process.env.DATABASE_URL) return next();
+      const { queryOne } = await import('./db/connection');
+      const user = await queryOne<{ id: string; email: string; name: string; role: string }>(
+        `SELECT id, email, name, role FROM users WHERE is_active IS NOT FALSE
+         ORDER BY (role = 'admin') DESC, created_at ASC LIMIT 1`,
+      );
+      if (!user) return next();
+      const token = generateAccessToken(user);
+      res.cookie('access_token', token, { httpOnly: true, sameSite: 'lax', path: '/', maxAge: 4 * 60 * 60 * 1000 });
+      req.headers.authorization = `Bearer ${token}`;
+    } catch (err) {
+      console.error('[desktop] local sign-in failed:', err);
+    }
+    next();
+  });
+}
+
 // Security headers
 app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -333,7 +360,10 @@ async function start() {
     });
   }
 
-  app.listen(PORT, () => {
+  // Desktop listens on loopback only: nothing on the network can reach the
+  // auto-signed-in API, and Windows does not raise a firewall prompt.
+  const HOST = process.env.SEO_BRAIN_DESKTOP === '1' ? '127.0.0.1' : undefined;
+  app.listen(Number(PORT), HOST as string, () => {
     console.log(`Brain API running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`API Key loaded: ${process.env.ANTHROPIC_API_KEY ? 'YES' : 'NO'}`);
@@ -343,4 +373,9 @@ async function start() {
   });
 }
 
-start().catch(console.error);
+start().catch((err) => {
+  console.error(err);
+  // The embedded database keeps the event loop alive, so a failed desktop start
+  // would sit there while the window waits. Exit so the shell can say what failed.
+  if (process.env.SEO_BRAIN_DESKTOP === '1') process.exit(1);
+});

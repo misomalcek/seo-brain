@@ -56,7 +56,8 @@ export async function startDesktopDatabase(): Promise<void> {
   }
 
   const { Pool } = await import('pg');
-  const admin = new Pool({ host, port: Number(port), database: 'postgres', max: 1 });
+  // Name the user. pg falls back to $USER, which a Finder or Windows launch does not promise.
+  const admin = new Pool({ host, port: Number(port), user: 'postgres', database: 'postgres', max: 1 });
   await admin.query(`DO $$ BEGIN
     CREATE ROLE brain_app LOGIN;
   EXCEPTION WHEN duplicate_object THEN NULL;

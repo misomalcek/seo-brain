@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SEO Brain — a desktop workspace for search work</title>
+    <meta name="description" content="SEO Brain is a chat workspace for SEO. It reads your notes and files and, with your own keys, asks Search Console, Analytics, PageSpeed, CrUX and Ahrefs. Postgres runs inside the app." />
+    <style>
+      :root {
+        --bg: #0e1217; --fg: #e6edf2; --muted: #8b98a3; --accent: #4cc9f0;
+        --green: #7ed6a5; --line: #26303a; --panel: #161c23;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: var(--bg); color: var(--fg);
+        font: 17px/1.5 ui-sans-serif, system-ui, sans-serif; }
+      a { color: var(--accent); }
+      header, main, footer { width: min(820px, calc(100% - 40px)); margin: 0 auto; }
+      header { padding: 48px 0 12px; }
+      h1 { font-size: 40px; letter-spacing: 0.02em; font-weight: 600; margin: 0 0 8px; }
+      h2 { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+        margin: 36px 0 10px; font-weight: 600; }
+      p, li { color: #d3dbe2; }
+      .lede { font-size: 20px; color: var(--fg); max-width: 40em; }
+      .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 22px 0; }
+      .btn { display: inline-block; background: var(--accent); color: #06121a; text-decoration: none;
+        font-weight: 650; padding: 12px 18px; border-radius: 8px; }
+      .btn.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+      .note { color: var(--muted); font-size: 14px; }
+      section { border-top: 1px solid var(--line); }
+      ul { padding-left: 1.2em; }
+      li { margin: 6px 0; }
+      code { font: 13px/1.45 ui-monospace, monospace; color: #c4ced6; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+      .card h3 { margin: 0 0 6px; font-size: 16px; }
+      .card p { margin: 0; font-size: 15px; }
+      footer { padding: 28px 0 48px; color: var(--muted); font-size: 14px; }
+      @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 32px; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>SEO Brain</h1>
+      <p class="lede">A chat workspace for search work. It reads your notes and the files you give it, and with your own keys it asks Search Console, Analytics, PageSpeed, CrUX and Ahrefs. Postgres runs inside the app.</p>
+      <div class="row">
+        <a class="btn" href="https://github.com/misomalcek/seo-brain/releases/download/v0.1.1/seo-brain_0.1.1_aarch64.dmg">Download for Apple Silicon</a>
+        <a class="btn" href="https://github.com/misomalcek/seo-brain/releases/download/v0.1.1/seo-brain_0.1.1_x64-setup.exe">Download for Windows</a>
+        <a class="ghost btn" href="https://github.com/misomalcek/seo-brain">Source</a>
+      </div>
+      <p class="note">Version 0.1.1. Apple Silicon, and Windows 10/11 x64. Node and Postgres travel inside the app, so there is nothing else to install. Not notarized: on a Mac, right-click the app, then Open. On Windows, More info, then Run anyway. No account with us, no telemetry. Keys stay on your machine. Checksums are on the <a href="https://github.com/misomalcek/seo-brain/releases/tag/v0.1.1">release</a>.</p>
+    </header>
+    <main>
+      <section>
+        <h2>What you can do with it</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Ask about your site</h3>
+            <p>Search Console analytics, quick wins, period comparisons and technical checks. GA4 traffic. PageSpeed and CrUX field data. Each source turns on when you add its key.</p>
+          </div>
+          <div class="card">
+            <h3>Research keywords and links</h3>
+            <p>Ahrefs domain rating, organic keywords, backlinks, competitors, SERP overview, keyword ideas, site-audit issues and internal links. 25 Ahrefs tools, with the API budget shown.</p>
+          </div>
+          <div class="card">
+            <h3>Read the live web</h3>
+            <p>Web search, fetch and render a page, a Lighthouse audit, Google organic results and Google AI Mode answers for a query.</p>
+          </div>
+          <div class="card">
+            <h3>Work with your own material</h3>
+            <p>Upload files and save outputs. Search your past articles and find similar ones. A content calendar, task plans, custom agents and personas.</p>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2>How it runs</h2>
+        <ul>
+          <li>The window opens at once and shows a start screen while the local database and API come up. The first launch takes longer, because it creates the database.</li>
+          <li>Postgres runs inside the app, with pgvector. It is the same SQL the server edition runs.</li>
+          <li>Chat needs an Anthropic key, OpenRouter, or any OpenAI-compatible endpoint, including a local model. A missing key is a quiet switch, not a crash.</li>
+          <li>Embeddings are computed on your machine with nomic-embed-text v1 (768 dimensions). The model downloads only after you agree, and the text never goes to the chat endpoint.</li>
+          <li>The same codebase deploys three ways: this desktop app on macOS and Windows, or a Linux server with Postgres.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Concepts and the stack</h2>
+        <ul>
+          <li>Tauri 2 and Rust for the desktop shell. Express and TypeScript for the API. Next.js for the chat.</li>
+          <li>The Anthropic SDK, and tool calling across 49 tools (48 in the desktop build, which leaves out the knowledge-graph tool).</li>
+          <li>A cheap model routes the tools and a stronger one writes the answer. That split comes from Team Brain, the production system SEO Brain was rebuilt from.</li>
+          <li>Google service-account access for Search Console, GA4, PageSpeed and CrUX.</li>
+          <li>Postgres with pgvector, embedded for the desktop, with 44 migrations.</li>
+          <li>On the server: TimescaleDB, trigram search and a knowledge-graph tool. The desktop build leaves these out.</li>
+        </ul>
+      </section>
+      <section>
+        <h2>Who made it</h2>
+        <p>Michal directed it, tested it, and decided what shipped. Before it was a product, SEO Brain ran in production as Team Brain for a 15-person SEO and content team. The code came from a sequence of AI seats, each given a job:</p>
+        <ul>
+          <li>Claude Code (Opus) set the architecture.</li>
+          <li>Grok, in Cursor, built the desktop edition.</li>
+          <li>Claude Code (Opus) fixed the start-up for 0.1.1.</li>
+        </ul>
+      </section>
+    </main>
+    <footer>
+      Provided as is. Genuine feedback: open an issue on the repository.
+    </footer>
+  </body>
+</html>

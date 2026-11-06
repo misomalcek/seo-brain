@@ -23,11 +23,12 @@ jobs:
         run: |
           $exe = Get-ChildItem "apps/desktop/src-tauri/target/release/bundle/nsis/*-setup.exe" | Select-Object -First 1
           if (-not $exe) { throw "nsis installer not found" }
-          $dest = Join-Path $exe.DirectoryName "seo-brain_0.1.0_x64-setup.exe"
+          $version = (Get-Content apps/desktop/src-tauri/tauri.conf.json | ConvertFrom-Json).version
+          $dest = Join-Path $exe.DirectoryName "seo-brain_${version}_x64-setup.exe"
           Move-Item -Force $exe.FullName $dest
           Get-Item $dest | Select-Object Name, Length
       - uses: actions/upload-artifact@v7
         with:
           name: seo-brain-windows
-          path: apps/desktop/src-tauri/target/release/bundle/nsis/seo-brain_0.1.0_x64-setup.exe
+          path: apps/desktop/src-tauri/target/release/bundle/nsis/seo-brain_*_x64-setup.exe
           if-no-files-found: error
