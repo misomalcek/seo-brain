@@ -89,7 +89,10 @@ fn start_api(app: AppHandle) {
         let _ = writeln!(header, "node {} api {} port {port}", node.display(), api.display());
 
         let mut cmd = Command::new(&node);
-        cmd.arg(api.join("dist").join("index.js"))
+        // Node's Windows main-module resolver mishandles the extended-length
+        // `\\?\` resource path returned by Tauri. Resolve the entry point
+        // relative to the API working directory instead.
+        cmd.arg("dist/index.js")
             .current_dir(&api)
             .env("SEO_BRAIN_DESKTOP", "1")
             .env("SEO_BRAIN_HOME", &home)
