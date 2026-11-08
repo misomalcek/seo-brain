@@ -1,6 +1,6 @@
 [package]
 name = "seo-brain"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "SEO Brain desktop shell"
 
